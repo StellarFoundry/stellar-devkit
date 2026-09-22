@@ -56,3 +56,21 @@
 
 - No network access, no secrets, bounded decoding, structured errors.
 - Fuzzing is planned, not yet implemented.
+
+## Contributor backlog
+
+- **35 open issues** across core, RPC, XDR/SCVal, transactions, events, contract
+  inspection, testing, security, CLI, configuration, GitHub/SARIF,
+  observability, and release.
+- Complexity: 4 trivial, 19 medium, 12 high (5,650 pre-multiplier points).
+- Manifest: [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md); audit:
+  [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md).
+- The 125-issue / 25,000-point target is **not** supported by the current
+  legitimate scope; complexity is not inflated. See
+  [BUILD_REPORT.md](BUILD_REPORT.md).
+
+## Drips documents
+
+- [DRIPS_READINESS.md](DRIPS_READINESS.md)
+- [DRIPS_APPLICATION_DRAFT.md](DRIPS_APPLICATION_DRAFT.md)
+- [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md)
