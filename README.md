@@ -57,6 +57,7 @@ Exit codes: `0` success, `2` usage error, `3` runtime/decode error.
 - [Getting started](docs/GETTING_STARTED.md)
 - [CLI reference](docs/CLI.md)
 - [Memory measurement](docs/MEMORY.md)
+- [Testing guide](docs/TESTING.md)
 - [Project status](docs/PROJECT_STATUS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Contributing through Drips Wave](docs/WAVE.md)

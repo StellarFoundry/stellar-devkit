@@ -29,5 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Conventional Commits; a dry-run workflow runs on demand and on release.
 - Benchmark: `cargo run --release -p devkit-xdr --example mem_profile` reports
   peak and current memory per decode input size (see `docs/MEMORY.md`).
+- Fuzzing: `fuzz/` cargo-fuzz targets for XDR/SCVal decoding, exercised by a
+  weekly bounded scheduled workflow (see `docs/TESTING.md`).
 - Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
   pull-request and issue templates.
