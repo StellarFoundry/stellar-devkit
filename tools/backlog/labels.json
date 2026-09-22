@@ -23,6 +23,7 @@
   { "name": "area/github", "color": "c5def5", "description": "GitHub integration" },
   { "name": "area/sarif", "color": "c5def5", "description": "SARIF reporting" },
   { "name": "area/observability", "color": "c5def5", "description": "Logging, tracing, benchmarks" },
+  { "name": "area/performance", "color": "c5def5", "description": "Performance work" },
   { "name": "area/docs", "color": "c5def5", "description": "Documentation" },
   { "name": "area/release", "color": "c5def5", "description": "Release engineering" },
   { "name": "difficulty/trivial", "color": "ededed", "description": "Small, bounded change" },
@@ -40,5 +41,6 @@
   { "name": "phase/10-observability", "color": "bfd4f2", "description": "Phase 10" },
   { "name": "phase/11-devex", "color": "bfd4f2", "description": "Phase 11" },
   { "name": "phase/12-release", "color": "bfd4f2", "description": "Phase 12" },
+  { "name": "phase/13-docs", "color": "bfd4f2", "description": "Phase 13" },
   { "name": "good first issue", "color": "7057ff", "description": "Good for new contributors" }
 ]

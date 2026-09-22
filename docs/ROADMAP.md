@@ -1,65 +1,57 @@
 # Roadmap
 
-Phases are ordered so that each builds on a working foundation. Only completed
-items are claimed; everything else is tracked as issues.
+This roadmap distinguishes **Completed** (works today), **In progress**, and
+**Planned** (backed by real issues). Nothing planned is claimed as implemented.
 
-## Phase 1 — Foundation (in progress)
+## Completed (works today)
 
-- Workspace, core types, network profiles.
-- XDR/SCVal/envelope/event decoding to JSON.
-- Strkey classification.
-- CLI with stable exit codes.
-- CI, docs, governance.
+- Workspace: `devkit-core`, `devkit-xdr`, `devkit-rpc`, `devkit-cli`.
+- Bounded base64 decoding of `ScVal`, `TransactionEnvelope`, and
+  `ContractEvent` to JSON via `stellar-xdr`.
+- Strkey classification via `stellar-strkey`.
+- Endpoint security validation (https only; loopback http; no credentials).
+- Typed RPC protocol layer with a deterministic mock transport and retry policy.
+- CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`, `endpoint`.
+- CI (fmt, clippy, tests) on Linux, Windows, and macOS.
 
-## Phase 2 — RPC infrastructure
+## In progress
 
-- Integrate `stellar-rpc-client` behind a typed interface.
-- Network profiles, endpoint configuration, timeouts, retries.
-- Diagnostics (`doctor` against a live endpoint), rate-limit handling.
-- Mock transport for deterministic tests.
+- Nothing is partially implemented; the next work item is the live RPC transport
+  (issue-backed).
 
-## Phase 3 — XDR / SCVal schema
+## Planned (issue-backed phases)
 
-- Curated, versioned JSON schema (stable across releases).
-- Batch decoding and diff-friendly output.
-- Compatibility fixtures.
+| Phase | Focus | Issues |
+| ----- | ----- | ------ |
+| 01 Foundation | Error taxonomy, shared models, output envelope, validation primitives | 5 |
+| 02 RPC | Live transport, request construction, error taxonomy, pagination, rate limits, integration server | 13 |
+| 03 XDR / SCVal | Collections, addresses, result/meta, diagnostic events, ledger entries, typed conversions, schema | 14 |
+| 04 Analysis | Envelope/operation/fee/signature/memo/bounds/footprint/result analysis, events, ledger helpers | 17 |
+| 05 Contracts | Contract IDs, WASM validation, spec inspection, storage, events-to-spec, environment, CLI | 12 |
+| 06 Testing | Fixture loader, malformed corpus, snapshots, cross-platform, corpus runner, WASM fixtures, fuzz CI | 12 |
+| 07 Security | Rule engine, findings, suppression, corpus, FP/FN tests, metadata/WASM/RPC hardening, SARIF catalog | 11 |
+| 08 CLI / config | Configuration, profiles, global flags, error UX, verbosity, JSON errors, stdin | 12 |
+| 09 GitHub / CI | Action, reusable workflow, SARIF upload, baseline, release validation, triage, auditing | 10 |
+| 10 Performance / observability | RPC and decode benchmarks, memory, cache, regression tests, logging | 9 |
+| 11 Developer experience | Docs and integration guides | 5 |
+| 12 Release | Versioning policy, changelog automation, crates.io readiness, SBOM, compatibility matrix | 8 |
+| 13 Documentation | RPC, XDR/SCVal, contract, security authoring, configuration guides | 5 |
 
-## Phase 4 — Transaction and event analysis
+The exact issue counts per phase come from
+[ISSUE_BACKLOG.md](ISSUE_BACKLOG.md). See also [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
-- Operations, resources, fees, result codes, events, affected state.
-- Honest separation of confirmed facts vs. inference.
+## Future (not yet specified)
 
-## Phase 5 — Contract intelligence
+- Editor integration (diagnostics provider).
+- Correlation of findings across transactions.
+- Optional, clearly labeled assistance with network safeguards (never required).
 
-- WASM metadata and spec inspection (via `soroban-spec`).
-- Confirmed facts vs. inference, with explicit limitations.
+## Dependency shape
 
-## Phase 6 — Testing infrastructure
+```
+foundation ─▶ xdr/scval ─▶ transactions ─▶ contracts ─▶ security engine ─▶ SARIF/GitHub
+     └─────▶ rpc protocol ─▶ live transport ─▶ resilience ─▶ events/ledger
+```
 
-- Fixture system and mock network.
-- Regression, property, and fuzz testing.
-
-## Phase 7 — Security
-
-- Malformed-input robustness, unsafe RPC configuration, SSRF-safe endpoint
-  policy, resource limits.
-
-## Phase 8 — CLI and developer experience
-
-- Configuration files, environment variables, logging.
-
-## Phase 9 — GitHub / CI / SARIF
-
-- GitHub Action, changed-file analysis, SARIF reporting.
-
-## Phase 10 — Observability and performance
-
-- Request tracing, benchmarks, measured performance.
-
-## Phase 11 — Developer experience
-
-- Examples, snippets, guides.
-
-## Phase 12 — Release and production hardening
-
-- Release automation, binaries, crates.io, compatibility policy.
+Issues state their dependencies explicitly. Many are independent and can be
+started in parallel.

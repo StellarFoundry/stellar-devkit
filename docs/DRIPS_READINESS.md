@@ -97,8 +97,9 @@ changelog, and (planned) cross-platform binaries.
 
 ## Known limitations
 
-- Only 35 issues exist today; the project is early. A 125-issue, 25,000-point
-  backlog is not supported by the current scope (see
+- The backlog contains 121 open issues. Most are **not implemented**; the
+  project is early (foundation and RPC protocol layer only). A 25,000-point
+  backlog is not supported by real scope (see
   [BUILD_REPORT.md](BUILD_REPORT.md)).
 - No live RPC, no release binaries, no published crates.
 - Traction is minimal and is reported honestly.

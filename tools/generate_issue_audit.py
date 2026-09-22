@@ -15,7 +15,7 @@ AREA_PRIORITY = [
     "area/core", "area/rpc", "area/xdr", "area/scval", "area/transactions",
     "area/events", "area/contract-inspection", "area/testing", "area/security",
     "area/cli", "area/config", "area/github", "area/sarif", "area/observability",
-    "area/docs", "area/release", "area/ci",
+    "area/performance", "area/docs", "area/release", "area/ci",
 ]
 
 

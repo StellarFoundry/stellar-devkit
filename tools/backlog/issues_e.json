@@ -1,0 +1,569 @@
+[
+  {
+    "title": "feat(contracts): handle and validate contract IDs",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "Contract IDs are not handled as a first-class type, so users pass raw strings around.",
+    "why": "Contracts are the unit of Soroban work; IDs must be validated and normalized consistently.",
+    "context": "`stellar-strkey` supports contract strkeys and contract ID parsing exists at the XDR level.",
+    "scope": [
+      "Add a validated ContractId type that accepts strkey or hex forms",
+      "Normalize output and report the accepted input form"
+    ],
+    "out_of_scope": [
+      "Resolving a contract ID to a WASM hash over the network."
+    ],
+    "guidance": [
+      "Reject ambiguous forms; never guess."
+    ],
+    "modules": [
+      "crates/devkit-core/src/lib.rs",
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Contract IDs validate and normalize deterministically"
+    ],
+    "tests": [
+      "Round-trip and rejection tests"
+    ],
+    "security": "Validate untrusted input strictly.",
+    "performance": "Negligible.",
+    "docs": "Document accepted forms in the contracts guide.",
+    "deps": "None.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(contracts): discover and validate WASM containers",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "There is no way to load a WASM file and confirm it is a well-formed container before inspecting it.",
+    "why": "Validating the container is the safe first step before parsing custom sections.",
+    "context": "Contract spec extraction (a separate issue) needs a validated container.",
+    "scope": [
+      "Detect the WASM magic and version, and enforce a size limit",
+      "Report the result without executing the module"
+    ],
+    "out_of_scope": [
+      "Executing or instantiating WASM."
+    ],
+    "guidance": [
+      "Never interpret or run the module; parse structure only."
+    ],
+    "modules": [
+      "crates/devkit-contract/"
+    ],
+    "acceptance": [
+      "Valid containers are accepted; malformed ones are rejected with clear errors"
+    ],
+    "tests": [
+      "Tests with a valid fixture and truncated/invalid inputs"
+    ],
+    "security": "Bound size; treat WASM as untrusted.",
+    "performance": "Bound input size.",
+    "docs": "Document the validation rules.",
+    "deps": "None.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(contracts): cache extracted contract specs",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "area/performance",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "Spec extraction would be repeated for the same WASM.",
+    "why": "Caching avoids duplicate work in multi-command workflows.",
+    "context": "Spec extraction is a separate issue.",
+    "scope": [
+      "Add an opt-in cache keyed by content hash",
+      "Bound cache size and document invalidation"
+    ],
+    "out_of_scope": [
+      "Remote caching."
+    ],
+    "guidance": [
+      "Cache only derived metadata, never raw secrets."
+    ],
+    "modules": [
+      "crates/devkit-contract/"
+    ],
+    "acceptance": [
+      "Cache hits avoid re-extraction and are bounded"
+    ],
+    "tests": [
+      "Unit tests for keys and eviction"
+    ],
+    "security": "Do not cache untrusted content indefinitely.",
+    "performance": "This is the optimization; measure it.",
+    "docs": "Document the cache.",
+    "deps": "WASM spec extraction issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(contracts): represent contract invocations",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "area/transactions",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "Invocation operations (host function calls) have no representation.",
+    "why": "Invocations are how contracts are called; representing them enables analysis and reporting.",
+    "context": "Soroban operations include `InvokeHostFunction`.",
+    "scope": [
+      "Represent an invocation's contract, function, and arguments",
+      "Render arguments with the curated SCVal renderer"
+    ],
+    "out_of_scope": [
+      "Executing invocations."
+    ],
+    "guidance": [
+      "Report only what the XDR contains."
+    ],
+    "modules": [
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Invocations render with contract, function, and arguments"
+    ],
+    "tests": [
+      "Fixture-based tests"
+    ],
+    "security": "Bound argument rendering.",
+    "performance": "None specific.",
+    "docs": "Document in the contracts guide.",
+    "deps": "SCVal rendering issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(contracts): inspect contract instance storage",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "phase/05-contracts",
+      "difficulty/high"
+    ],
+    "problem": "Contract instance storage cannot be inspected.",
+    "why": "Instance storage holds contract configuration and is commonly examined during debugging.",
+    "context": "Instance entries are returned by RPC ledger-entry lookups.",
+    "scope": [
+      "Decode a contract instance ledger entry and render its storage map",
+      "Distinguish instance data from other entries"
+    ],
+    "out_of_scope": [
+      "Writing storage."
+    ],
+    "guidance": [
+      "Render keys and values with the curated renderer; bound output."
+    ],
+    "modules": [
+      "crates/devkit-contract/",
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Instance storage renders for a fixture contract"
+    ],
+    "tests": [
+      "Fixture-based tests"
+    ],
+    "security": "Bound decoding of untrusted entries.",
+    "performance": "Linear in entry size.",
+    "docs": "Document in the contracts guide.",
+    "deps": "Ledger entry pretty-printing issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "high"
+  },
+  {
+    "title": "feat(contracts): inspect persistent and temporary storage entries",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "phase/05-contracts",
+      "difficulty/high"
+    ],
+    "problem": "Persistent and temporary contract data entries cannot be inspected.",
+    "why": "Storage durability and TTL are central Soroban concepts developers must observe.",
+    "context": "Entries expose their durability and live-until ledger.",
+    "scope": [
+      "Decode persistent and temporary entries with their TTL fields",
+      "Report durability explicitly"
+    ],
+    "out_of_scope": [
+      "Extending TTL."
+    ],
+    "guidance": [
+      "Report TTL as observed, not as a recommendation."
+    ],
+    "modules": [
+      "crates/devkit-contract/",
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Durability and TTL are reported"
+    ],
+    "tests": [
+      "Fixture-based tests per durability"
+    ],
+    "security": "Bound decoding.",
+    "performance": "None specific.",
+    "docs": "Document in the contracts guide.",
+    "deps": "Ledger entry pretty-printing issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "high"
+  },
+  {
+    "title": "feat(contracts): map contract events to spec types",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "area/events",
+      "phase/05-contracts",
+      "difficulty/high"
+    ],
+    "problem": "Contract events are decoded generically without using the contract spec.",
+    "why": "Using the spec turns cryptic values into labelled, typed output.",
+    "context": "Contract spec extraction and event decoding are separate issues.",
+    "scope": [
+      "Match event topics/data to spec entries when a spec is available",
+      "Fall back to generic decoding and label the fallback"
+    ],
+    "out_of_scope": [
+      "Guaranteeing a match; specs may be absent."
+    ],
+    "guidance": [
+      "Never present inferred types as confirmed; label inference."
+    ],
+    "modules": [
+      "crates/devkit-contract/",
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Events render with spec types when present, and clearly without when absent"
+    ],
+    "tests": [
+      "Tests with and without a spec"
+    ],
+    "security": "Bound decoding.",
+    "performance": "None specific.",
+    "docs": "Document the fallback behavior.",
+    "deps": "WASM spec extraction issue and event normalization issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "high"
+  },
+  {
+    "title": "feat(contracts): report contract environment and protocol compatibility",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "It is unclear which Soroban environment/protocol a contract targets.",
+    "why": "Compatibility information helps avoid deploying contracts against an incompatible protocol.",
+    "context": "Contract metadata and the environment host interface version are observable from the WASM.",
+    "scope": [
+      "Report observable environment/protocol metadata",
+      "State explicitly what cannot be determined"
+    ],
+    "out_of_scope": [
+      "Deployment checks."
+    ],
+    "guidance": [
+      "Separate confirmed metadata from inference."
+    ],
+    "modules": [
+      "crates/devkit-contract/"
+    ],
+    "acceptance": [
+      "Environment metadata is reported with limitations"
+    ],
+    "tests": [
+      "Fixture-based tests"
+    ],
+    "security": "None specific.",
+    "performance": "None specific.",
+    "docs": "Document in the contracts guide.",
+    "deps": "WASM spec extraction issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(contracts): add the contract inspection CLI command",
+    "labels": [
+      "type/feature",
+      "area/contract-inspection",
+      "area/cli",
+      "phase/05-contracts",
+      "difficulty/medium"
+    ],
+    "problem": "Contract inspection has no CLI entry point.",
+    "why": "A CLI command makes the inspection work usable without writing code.",
+    "context": "The CLI exposes decoding commands but nothing contract-specific.",
+    "scope": [
+      "Add a `contract` command that inspects a local WASM file",
+      "Support terminal and JSON output"
+    ],
+    "out_of_scope": [
+      "Remote contract fetching."
+    ],
+    "guidance": [
+      "Fail closed on missing files; never fetch over the network."
+    ],
+    "modules": [
+      "crates/devkit-cli/src/main.rs"
+    ],
+    "acceptance": [
+      "The command inspects a fixture WASM and prints results"
+    ],
+    "tests": [
+      "CLI test against a fixture"
+    ],
+    "security": "Treat the WASM path as untrusted; bound size.",
+    "performance": "Bound input size.",
+    "docs": "Document in docs/CLI.md and the contracts guide.",
+    "deps": "WASM spec extraction issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(events): add event filtering by contract and topics",
+    "labels": [
+      "type/feature",
+      "area/events",
+      "area/rpc",
+      "phase/04-analysis",
+      "difficulty/medium"
+    ],
+    "problem": "Events cannot be filtered by contract or topics beyond passing raw filters.",
+    "why": "Filtering is essential to focus on relevant events and reduce payload size.",
+    "context": "getEvents accepts filters; there is no typed filter builder.",
+    "scope": [
+      "Add a typed filter builder for contract IDs and topic segments",
+      "Validate filters before sending"
+    ],
+    "out_of_scope": [
+      "Historical indexing."
+    ],
+    "guidance": [
+      "Keep filters faithful to the RPC schema."
+    ],
+    "modules": [
+      "crates/devkit-rpc/src/lib.rs"
+    ],
+    "acceptance": [
+      "Filters build and validate deterministically"
+    ],
+    "tests": [
+      "Unit tests for filter construction"
+    ],
+    "security": "Bound the number of segments.",
+    "performance": "Smaller payloads.",
+    "docs": "Document filtering in the events guide.",
+    "deps": "Typed getEvents model issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(events): decode diagnostic events distinctly",
+    "labels": [
+      "type/feature",
+      "area/events",
+      "phase/04-analysis",
+      "difficulty/medium"
+    ],
+    "problem": "Diagnostic events are not separated from contract events.",
+    "why": "Diagnostic events are for debugging and must not be conflated with application events.",
+    "context": "Diagnostic events appear in transaction meta.",
+    "scope": [
+      "Decode and label diagnostic events distinctly",
+      "Render them with the curated renderer"
+    ],
+    "out_of_scope": [
+      "Host-level correlation."
+    ],
+    "guidance": [
+      "Label clearly; do not treat diagnostics as application data."
+    ],
+    "modules": [
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Diagnostic events are labelled and rendered"
+    ],
+    "tests": [
+      "Fixture-based tests"
+    ],
+    "security": "Bound size.",
+    "performance": "None specific.",
+    "docs": "Document in the events guide.",
+    "deps": "Diagnostic events XDR issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(events): normalize events into a stable structure",
+    "labels": [
+      "type/feature",
+      "area/events",
+      "phase/04-analysis",
+      "difficulty/medium"
+    ],
+    "problem": "Contract events have no normalized representation across sources.",
+    "why": "Normalization enables correlation, filtering, and stable output.",
+    "context": "Events arrive from RPC and from transaction meta.",
+    "scope": [
+      "Define a normalized event structure with source, contract, topics, data, and ledger",
+      "Populate it from both sources"
+    ],
+    "out_of_scope": [
+      "Semantic interpretation of topics."
+    ],
+    "guidance": [
+      "Keep the structure additive and documented."
+    ],
+    "modules": [
+      "crates/devkit-core/src/lib.rs",
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Both sources produce the same normalized shape"
+    ],
+    "tests": [
+      "Tests for each source"
+    ],
+    "security": "Bound field sizes.",
+    "performance": "None specific.",
+    "docs": "Document the structure in the events guide.",
+    "deps": "Typed getEvents model issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(events): correlate events with their transaction",
+    "labels": [
+      "type/feature",
+      "area/events",
+      "phase/04-analysis",
+      "difficulty/medium"
+    ],
+    "problem": "Events and transactions are shown independently.",
+    "why": "Correlation answers the common question of which transaction produced an event.",
+    "context": "RPC events and meta events both carry transaction context.",
+    "scope": [
+      "Attach transaction hash and ledger context to normalized events",
+      "Provide a lookup helper"
+    ],
+    "out_of_scope": [
+      "Graph analysis across transactions."
+    ],
+    "guidance": [
+      "Only correlate when the data is present."
+    ],
+    "modules": [
+      "crates/devkit-xdr/src/lib.rs"
+    ],
+    "acceptance": [
+      "Events carry transaction context when available"
+    ],
+    "tests": [
+      "Tests with and without context"
+    ],
+    "security": "None specific.",
+    "performance": "None specific.",
+    "docs": "Document correlation.",
+    "deps": "Event normalization issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  },
+  {
+    "title": "feat(ledger): add ledger sequence and close-time helpers",
+    "labels": [
+      "type/feature",
+      "area/events",
+      "area/rpc",
+      "phase/04-analysis",
+      "difficulty/trivial"
+    ],
+    "problem": "Ledger sequence and close-time handling is ad hoc.",
+    "why": "Ledger context is needed for event windows and diagnostics.",
+    "context": "getLatestLedger reports sequence and close time.",
+    "scope": [
+      "Add helpers to compute close-time from a ledger and to format ledger ranges",
+      "Use them in event tooling"
+    ],
+    "out_of_scope": [
+      "Historical ledger lookups."
+    ],
+    "guidance": [
+      "Document the approximate close-time model; it is an estimate."
+    ],
+    "modules": [
+      "crates/devkit-core/src/lib.rs"
+    ],
+    "acceptance": [
+      "Helpers are used and tested"
+    ],
+    "tests": [
+      "Unit tests for ranges and estimates"
+    ],
+    "security": "None specific.",
+    "performance": "None specific.",
+    "docs": "Document in the events/ledger guide.",
+    "deps": "None.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "trivial"
+  },
+  {
+    "title": "test(events): add event fixture generation tooling",
+    "labels": [
+      "type/testing",
+      "area/events",
+      "area/testing",
+      "phase/04-analysis",
+      "difficulty/medium"
+    ],
+    "problem": "Event fixtures must be hand-written.",
+    "why": "Tooling to generate fixtures makes event tests easy to add and review.",
+    "context": "Fixture infrastructure is a separate issue.",
+    "scope": [
+      "Add a small tool that encodes a described event into base64 XDR for fixtures",
+      "Never require network access"
+    ],
+    "out_of_scope": [
+      "Recording live events."
+    ],
+    "guidance": [
+      "Deterministic output; document provenance."
+    ],
+    "modules": [
+      "crates/devkit-xdr/examples/"
+    ],
+    "acceptance": [
+      "Generated fixtures load and assert in tests"
+    ],
+    "tests": [
+      "Round-trip test of generated fixtures"
+    ],
+    "security": "Fixtures must contain no secrets.",
+    "performance": "None specific.",
+    "docs": "Document in the testing guide.",
+    "deps": "Encode helpers issue.",
+    "dod": "Merged with tests passing and CI green.",
+    "complexity": "medium"
+  }
+]

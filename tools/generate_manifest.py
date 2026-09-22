@@ -19,7 +19,7 @@ AREA_PRIORITY = [
     "area/core", "area/rpc", "area/xdr", "area/scval", "area/transactions",
     "area/events", "area/contract-inspection", "area/testing", "area/security",
     "area/cli", "area/config", "area/github", "area/sarif", "area/observability",
-    "area/docs", "area/release", "area/ci",
+    "area/performance", "area/docs", "area/release", "area/ci",
 ]
 PHASE_ORDER = [
     "phase/01-foundation", "phase/02-rpc", "phase/03-xdr-scval", "phase/04-analysis",

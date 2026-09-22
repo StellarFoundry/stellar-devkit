@@ -56,15 +56,15 @@ No releases yet. No binaries, no crates.io publication.
 
 ## Issue backlog
 
-- **Total open issues:** 35
-- **Trivial:** 4
-- **Medium:** 19
-- **High:** 12
-- **Total pre-multiplier points:** 5,650
+- **Total open issues:** 121
+- **Trivial:** 7
+- **Medium:** 86
+- **High:** 28
+- **Total pre-multiplier points:** 19,200
 
-The requested 125-issue / 25,000-point target is **not supported** by the current
-legitimate scope. There are 12 genuinely high-complexity issues; inflating the
-rest to reach a number was explicitly avoided.
+The 25,000-point target would require 125 high-complexity issues. The backlog has
+28 genuinely high issues; the rest are honest medium and trivial work. Complexity
+was not inflated to reach a point total. The ~120-issue roadmap target is met.
 
 ## Drips readiness
 
@@ -75,9 +75,11 @@ payout are not guaranteed.
 ## Known limitations
 
 - No live RPC transport; the RPC layer is mock-only.
-- No contract inspection, security analysis, SARIF, or GitHub Action.
-- JSON output shape is unstable until a versioned schema lands.
+- No contract inspection implementation, security engine, SARIF, or GitHub Action
+  yet (all tracked as issues).
+- JSON output shape is unstable until the versioned schema lands.
 - No MSRV pin; no release automation.
+- The backlog (121 issues) is a roadmap; most of it is **not implemented**.
 
 ## Recommended next steps
 
