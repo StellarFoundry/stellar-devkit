@@ -107,15 +107,14 @@ Every open issue was audited against the Drips maintainer criteria. Results
 - **3 needs revision** (`status/needs-revision`, clarified on the issue).
 - **1 duplicate removed**, **1 merged** (issue count reduced from 121 to 119).
 
-Drips-ready pre-multiplier points: **14,000**. Complexity labels were not altered
-to change points.
+Complexity labels were not altered. Drips determines applicable points and
+budgets through its own system.
 
 ## Known limitations
 
-- The backlog contains 121 open issues. Most are **not implemented**; the
-  project is early (foundation and RPC protocol layer only). A 25,000-point
-  backlog is not supported by real scope (see
-  [BUILD_REPORT.md](BUILD_REPORT.md)).
+- The backlog contains 119 open issues. Most are **not implemented**; the
+  project is early (foundation and RPC protocol layer only). See
+  [BUILD_REPORT.md](BUILD_REPORT.md).
 - No live RPC, no release binaries, no published crates.
 - Traction is minimal and is reported honestly.
 

@@ -5,7 +5,7 @@ definitions are excluded.
 
 **Total open issues:** 119
 
-Complexity: 7 trivial, 84 medium, 28 high — 18900 pre-multiplier points.
+Complexity: 7 trivial, 84 medium, 28 high.
 
 ## phase/01-foundation
 

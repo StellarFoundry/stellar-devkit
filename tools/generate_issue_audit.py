@@ -10,7 +10,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "DRIPS_ISSUE_AUDIT.md"
 
-POINTS = {"trivial": 100, "medium": 150, "high": 200}
+COMPLEXITY_RANK = {"trivial": 0, "medium": 1, "high": 2}
+# Definitions superseded during the quality audit; excluded from the open backlog.
+CLOSED_TITLES = {
+    "feat(xdr): inspect diagnostic events",
+    "feat(cli): add configuration profiles",
+}
 AREA_PRIORITY = [
     "area/core", "area/rpc", "area/xdr", "area/scval", "area/transactions",
     "area/events", "area/contract-inspection", "area/testing", "area/security",
@@ -29,15 +34,17 @@ def area(labels: list[str]) -> str:
 def main() -> int:
     issues = []
     for path in sorted(glob.glob(str(ROOT / "tools" / "backlog" / "issues_*.json"))):
-        issues.extend(json.loads(Path(path).read_text(encoding="utf-8")))
+        for issue in json.loads(Path(path).read_text(encoding="utf-8")):
+            if issue["title"] in CLOSED_TITLES:
+                continue
+            issues.append(issue)
 
-    issues.sort(key=lambda i: (POINTS.get(i.get("complexity", "medium"), 150), i["title"]))
+    issues.sort(key=lambda i: (COMPLEXITY_RANK.get(i.get("complexity", "medium"), 1), i["title"]))
 
     total = len(issues)
     counts = {"trivial": 0, "medium": 0, "high": 0}
     for i in issues:
         counts[i.get("complexity", "medium")] += 1
-    points = sum(POINTS[i.get("complexity", "medium")] for i in issues)
 
     lines = [
         "# Drips Issue Audit",
@@ -49,15 +56,13 @@ def main() -> int:
         f"- **Trivial:** {counts['trivial']}",
         f"- **Medium:** {counts['medium']}",
         f"- **High:** {counts['high']}",
-        f"- **Total pre-multiplier points:** {points}",
         "",
-        "Complexity is assigned from the actual work required, not from a point",
-        "target. There are **not** 125 legitimate high-complexity issues in the",
-        "current scope, so a 25,000-point backlog is not supported. See",
-        "[BUILD_REPORT.md](BUILD_REPORT.md).",
+        "Complexity is assigned from the scope of each individual issue, not from an",
+        "aggregate reward target. Drips determines applicable points and budgets",
+        "through its own system.",
         "",
-        "| # | Title | Area | Complexity | Points | Dependencies | Acceptance | Tests | Security |",
-        "| - | ----- | ---- | ---------- | ------ | ------------ | ---------- | ----- | -------- |",
+        "| # | Title | Area | Complexity | Dependencies | Acceptance | Tests | Security |",
+        "| - | ----- | ---- | ---------- | ------------ | ---------- | ----- | -------- |",
     ]
     for idx, issue in enumerate(issues, start=1):
         labels = issue.get("labels", [])
@@ -68,7 +73,7 @@ def main() -> int:
         deps = issue.get("deps", "None.")
         lines.append(
             f"| {idx} | {issue['title']} | {area(labels).removeprefix('area/')} | "
-            f"{complexity} | {POINTS[complexity]} | {deps} | {has_acceptance} | {has_tests} | {has_security} |"
+            f"{complexity} | {deps} | {has_acceptance} | {has_tests} | {has_security} |"
         )
 
     lines.append("")
@@ -83,7 +88,7 @@ def main() -> int:
     lines.append("")
 
     OUT.write_text("\n".join(lines), encoding="utf-8", newline="\n")
-    print(f"Wrote {OUT} with {total} issues ({counts['trivial']}/{counts['medium']}/{counts['high']}), {points} points.")
+    print(f"Wrote {OUT} with {total} issues ({counts['trivial']}/{counts['medium']}/{counts['high']}).")
     return 0
 
 

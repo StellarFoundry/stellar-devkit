@@ -18,7 +18,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "DRIPS_ISSUE_QUALITY_AUDIT.md"
-POINTS = {"trivial": 100, "medium": 150, "high": 200}
 
 # Duplicate issue -> canonical issue.
 DUPLICATES = {51: 73}
@@ -151,8 +150,6 @@ def main() -> int:
         })
 
     counts = Counter(r["class"] for r in rows)
-    ready_points = sum(POINTS[r["complexity"]] for r in rows if r["ready"])
-    all_points = sum(POINTS[r["complexity"]] for r in rows)
     comp_counts = Counter(r["complexity"] for r in rows)
 
     lines = [
@@ -160,7 +157,7 @@ def main() -> int:
         "",
         "- **Audit date:** 2026-09-22",
         "- **Repository commit audited:** 07bef9e",
-        "- **Total open issues audited:** " + str(len(rows)),
+        "- **Issues classified:** " + str(len(rows)) + " (1 duplicate and 1 merge closed during remediation; 119 open).",
         "",
         "Standard applied: Drips *Creating Meaningful Issues* and the Wave maintainer",
         "documentation. Classification is evidence-based; weak issues are flagged, not",
@@ -183,20 +180,19 @@ def main() -> int:
         "",
         "## Complexity audit",
         "",
-        "| Complexity | Count | Points |",
-        "|---|---:|---:|",
-        f"| High | {comp_counts.get('high', 0)} | {comp_counts.get('high', 0) * 200} |",
-        f"| Medium | {comp_counts.get('medium', 0)} | {comp_counts.get('medium', 0) * 150} |",
-        f"| Trivial | {comp_counts.get('trivial', 0)} | {comp_counts.get('trivial', 0) * 100} |",
-        f"| **Total** | **{len(rows)}** | **{all_points}** |",
+        "Complexity is assigned from the scope of each individual issue, not from an",
+        "aggregate reward target. Drips determines applicable points and budgets",
+        "through its own system.",
+        "",
+        "| Complexity | Count |",
+        "|---|---:|",
+        f"| High | {comp_counts.get('high', 0)} |",
+        f"| Medium | {comp_counts.get('medium', 0)} |",
+        f"| Trivial | {comp_counts.get('trivial', 0)} |",
+        f"| **Total** | **{len(rows)}** |",
         "",
         "No complexity label was changed during this audit: no issue was found to be",
         "clearly underpriced or overpriced. Complexity was not inflated.",
-        "",
-        "## Drips-ready points integrity",
-        "",
-        f"- Points across all audited issues: **{all_points}**",
-        f"- Points across Drips-ready issues only: **{ready_points}**",
         "",
         "## Issue-by-issue results",
         "",
@@ -208,7 +204,7 @@ def main() -> int:
             f"### #{r['number']} — {r['title']}",
             "",
             f"- Classification: **{r['class']}**",
-            f"- Complexity: {r['complexity']} ({POINTS[r['complexity']]} points)",
+            f"- Complexity: {r['complexity']}",
             f"- Area: {r['area']}",
             "- Impact: PASS — maps to a real capability of the toolkit.",
             "- Context: PASS — problem, why, current state, and scope sections present.",
@@ -225,12 +221,12 @@ def main() -> int:
     lines += [
         "## Drips-ready issue list",
         "",
-        "| Issue | Title | Complexity | Points | Area | Why it is Wave-ready |",
-        "|---|---|---:|---:|---|---|",
+        "| Issue | Title | Complexity | Area | Why it is Wave-ready |",
+        "|---|---|---:|---|---|",
     ]
     for r in sorted((x for x in rows if x["ready"]), key=lambda x: x["number"]):
         lines.append(
-            f"| #{r['number']} | {r['title']} | {r['complexity']} | {POINTS[r['complexity']]} | "
+            f"| #{r['number']} | {r['title']} | {r['complexity']} | "
             f"{r['area']} | Depends only on implemented or independent work; testable. |"
         )
 
@@ -249,7 +245,6 @@ def main() -> int:
     OUT.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print(f"Wrote {OUT}")
     print("counts:", dict(counts))
-    print(f"all points {all_points}, ready points {ready_points}")
     return 0
 
 

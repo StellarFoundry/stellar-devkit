@@ -22,11 +22,11 @@ serves developers building on Stellar.
 
 ## Planned issues
 
-121 issues across core, RPC, XDR/SCVal, transactions, events, contract
+119 issues across core, RPC, XDR/SCVal, transactions, events, contract
 inspection, testing, security, CLI, configuration, GitHub/SARIF, performance,
-observability, release, and documentation. Complexity: 7 trivial, 86 medium,
-28 high (19,200 pre-multiplier points). See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md)
-and [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md). Most issues are not yet
+observability, release, and documentation. Complexity: 7 trivial, 84 medium,
+28 high. See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md) and
+[DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md). Most issues are not yet
 implemented; the working foundation is described in
 [PROJECT_STATUS.md](PROJECT_STATUS.md).
 

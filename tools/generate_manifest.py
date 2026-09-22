@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parent.parent
 BACKLOG = Path(__file__).resolve().parent / "backlog"
 REPO = "StellarFoundry/stellar-devkit"
 OUT = ROOT / "docs" / "ISSUE_BACKLOG.md"
-POINTS = {"trivial": 100, "medium": 150, "high": 200}
 AREA_PRIORITY = [
     "area/core", "area/rpc", "area/xdr", "area/scval", "area/transactions",
     "area/events", "area/contract-inspection", "area/testing", "area/security",
@@ -72,7 +71,6 @@ def main() -> int:
     counts = {"trivial": 0, "medium": 0, "high": 0}
     for issue in issues:
         counts[issue["complexity"]] += 1
-    points = sum(POINTS[i["complexity"]] for i in issues)
 
     lines = [
         "# Issue Backlog", "",
@@ -80,7 +78,7 @@ def main() -> int:
         "definitions are excluded.", "",
         f"**Total open issues:** {len(issues)}", "",
         f"Complexity: {counts['trivial']} trivial, {counts['medium']} medium, "
-        f"{counts['high']} high — {points} pre-multiplier points.", "",
+        f"{counts['high']} high.", "",
     ]
     for phase in PHASE_ORDER + [p for p in by_phase if p not in PHASE_ORDER]:
         if phase not in by_phase:
