@@ -9,6 +9,20 @@ Thanks for helping build developer infrastructure for Stellar and Soroban.
 - Do not claim a feature works unless it is implemented and tested.
 - Keep the core usable without AI and without network access by default.
 
+## Contributing through a Wave
+
+If you are contributing through an open-source Wave:
+
+- **Request assignment on an issue before starting.** Do not open a pull request
+  for an issue you have not been assigned.
+- Each issue has a `difficulty/*` label describing its scope. Drips determines
+  applicable points and budgets through its own system.
+- Your pull request must include `Closes #<issue-number>`.
+- Run the local gate before opening the PR: `cargo fmt --all -- --check`,
+  `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all`.
+
+See [`docs/WAVE.md`](docs/WAVE.md) for the full process.
+
 ## Setup
 
 ```bash
