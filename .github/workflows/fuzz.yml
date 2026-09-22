@@ -1,0 +1,85 @@
+name: Fuzz
+
+on:
+  schedule:
+    # Weekly, Monday 03:00 UTC. Bounded runs keep normal CI fast.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: Bounded seconds to fuzz each target
+        required: false
+        default: "60"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuzz-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Fuzz smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: fuzz
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --locked
+      - name: Discover fuzz targets
+        id: targets
+        run: |
+          set -euo pipefail
+          if [ ! -d fuzz/fuzz_targets ]; then
+            echo "::error::fuzz/fuzz_targets not found" >&2
+            exit 1
+          fi
+          targets=$(find fuzz/fuzz_targets -maxdepth 1 -name '*.rs' -printf '%f\n' \
+            | sed 's/\.rs$//' | sort)
+          if [ -z "$targets" ]; then
+            echo "::error::no fuzz targets found in fuzz/fuzz_targets" >&2
+            exit 1
+          fi
+          {
+            echo "targets<<FUZZ_TARGETS"
+            echo "$targets"
+            echo "FUZZ_TARGETS"
+          } >> "$GITHUB_OUTPUT"
+          echo "Discovered targets:"
+          echo "$targets"
+      - name: Run each target (bounded)
+        env:
+          TARGETS: ${{ steps.targets.outputs.targets }}
+          SECONDS_PER_TARGET: ${{ github.event.inputs.seconds || '60' }}
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r target; do
+            [ -z "$target" ] && continue
+            echo "::group::fuzz $target"
+            cargo +nightly fuzz run "$target" -- -max_total_time="$SECONDS_PER_TARGET" \
+              || status=1
+            echo "::endgroup::"
+          done <<< "$TARGETS"
+          exit "$status"
+      - name: Fail on crash artifacts
+        if: success()
+        run: |
+          set -euo pipefail
+          if [ -n "$(find fuzz/artifacts -type f 2>/dev/null)" ]; then
+            echo "::error::fuzz produced crash artifacts" >&2
+            find fuzz/artifacts -type f
+            exit 1
+          fi
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crashes
+          path: fuzz/artifacts
+          if-no-files-found: ignore

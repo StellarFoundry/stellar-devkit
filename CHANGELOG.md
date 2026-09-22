@@ -27,5 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI: format, clippy, and tests on Linux, Windows, and macOS.
 - Tooling: `tools/changelog.py` generates reviewable release sections from
   Conventional Commits; a dry-run workflow runs on demand and on release.
+- Fuzzing: `fuzz/` cargo-fuzz targets for XDR/SCVal decoding, exercised by a
+  weekly bounded scheduled workflow (see `docs/TESTING.md`).
 - Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
   pull-request and issue templates.
