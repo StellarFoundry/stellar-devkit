@@ -59,16 +59,14 @@
 
 ## Contributor backlog
 
-- **121 open issues** across core, RPC, XDR/SCVal, transactions, events, contract
-  inspection, testing, security, CLI, configuration, GitHub/SARIF,
-  performance, observability, release, and documentation.
-- Complexity: 7 trivial, 86 medium, 28 high (19,200 pre-multiplier points).
-- Manifest: [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md); audit:
+- **119 open issues** after a quality audit (down from 121).
+- Audit result: **89 Drips-ready**, 24 blocked by dependency, 3 deferred, 3 needing
+  revision. See [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md).
+- Status labels `status/ready`, `status/blocked`, `status/deferred`, and
+  `status/needs-revision` are applied.
+- Manifest: [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md); prior audit:
   [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md).
-- The backlog is a roadmap: most issues are **not implemented**. Only the
-  foundation and RPC protocol layer exist today.
-- The 25,000-point target is not supported by real engineering scope; complexity
-  is not inflated. See [BUILD_REPORT.md](BUILD_REPORT.md).
+- The backlog is a roadmap: most issues are **not implemented**.
 
 ## Drips documents
 

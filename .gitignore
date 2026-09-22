@@ -24,3 +24,8 @@ Thumbs.db
 dist/
 *.sarif
 *.report.json
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.venv/

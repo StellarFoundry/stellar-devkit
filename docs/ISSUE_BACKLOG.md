@@ -3,9 +3,9 @@
 Generated from `tools/backlog/issues_*.json`. Closed and superseded
 definitions are excluded.
 
-**Total open issues:** 121
+**Total open issues:** 119
 
-Complexity: 7 trivial, 86 medium, 28 high — 19200 pre-multiplier points.
+Complexity: 7 trivial, 84 medium, 28 high — 18900 pre-multiplier points.
 
 ## phase/01-foundation
 
@@ -50,7 +50,6 @@ Complexity: 7 trivial, 86 medium, 28 high — 19200 pre-multiplier points.
 | #48 | feat(scval): fully decode and render maps and vectors | scval | medium | Curated SCVal rendering issue. |
 | #49 | feat(scval): decode and render addresses and contract IDs | scval | medium | None. |
 | #50 | feat(xdr): inspect TransactionResult and TransactionMeta | xdr | medium | None. |
-| #51 | feat(xdr): inspect diagnostic events | xdr | medium | Transaction meta issue. |
 | #52 | feat(xdr): pretty-print ledger entries | xdr | medium | getLedgerEntries model issue. |
 | #53 | feat(scval): add type-safe conversions between SCVal and Rust primitives | scval | high | None. |
 | #54 | feat(xdr): distinguish envelope v0 and v1 variants | xdr | medium | None. |
@@ -132,7 +131,6 @@ Complexity: 7 trivial, 86 medium, 28 high — 19200 pre-multiplier points.
 | #30 | feat(cli): add shell completion generation | cli | trivial | None. |
 | #32 | feat(cli): add config init, show, and validate subcommands | cli | medium | Configuration system issue. |
 | #33 | test(cli): assert the exit-code contract | cli | trivial | None. |
-| #95 | feat(cli): add configuration profiles | cli | medium | Configuration system issue. |
 | #96 | feat(cli): unify global flags across commands | cli | medium | None. |
 | #97 | feat(cli): improve error presentation with suggestions | cli | medium | Secret redaction issue. |
 | #98 | feat(cli): add verbosity control | cli | trivial | Structured logging issue. |
@@ -194,13 +192,13 @@ Complexity: 7 trivial, 86 medium, 28 high — 19200 pre-multiplier points.
 | ----- | ----- |
 | phase/01-foundation | 5 |
 | phase/02-rpc | 15 |
-| phase/03-xdr-scval | 14 |
+| phase/03-xdr-scval | 13 |
 | phase/04-analysis | 15 |
 | phase/05-contracts | 10 |
 | phase/06-testing | 9 |
 | phase/07-security | 13 |
-| phase/08-cli | 11 |
+| phase/08-cli | 10 |
 | phase/09-github | 10 |
 | phase/10-observability | 6 |
 | phase/12-release | 8 |
-| **Total** | **121** |
+| **Total** | **119** |

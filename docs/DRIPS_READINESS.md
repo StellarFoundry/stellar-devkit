@@ -95,6 +95,21 @@ changelog, and (planned) cross-platform binaries.
 - Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Ecosystem research: [ECOSYSTEM_RESEARCH.md](ECOSYSTEM_RESEARCH.md)
 
+## Quality audit outcome
+
+Every open issue was audited against the Drips maintainer criteria. Results
+(see [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md)):
+
+- **89 Drips-ready** issues (`status/ready`).
+- **24 blocked by dependency** (`status/blocked`) — not to be added to a Wave
+  until their dependency lands.
+- **3 deferred / future work** (`status/deferred`).
+- **3 needs revision** (`status/needs-revision`, clarified on the issue).
+- **1 duplicate removed**, **1 merged** (issue count reduced from 121 to 119).
+
+Drips-ready pre-multiplier points: **14,000**. Complexity labels were not altered
+to change points.
+
 ## Known limitations
 
 - The backlog contains 121 open issues. Most are **not implemented**; the
