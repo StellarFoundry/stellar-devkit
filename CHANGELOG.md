@@ -25,5 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation: ecosystem research, architecture, getting started, CLI
   reference, project status, roadmap.
 - CI: format, clippy, and tests on Linux, Windows, and macOS.
+- Tooling: `tools/changelog.py` generates reviewable release sections from
+  Conventional Commits; a dry-run workflow runs on demand and on release.
 - Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
   pull-request and issue templates.
