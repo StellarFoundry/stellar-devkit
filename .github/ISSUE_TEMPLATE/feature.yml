@@ -1,0 +1,71 @@
+name: Feature request
+description: Propose a feature or improvement
+title: "[Feature]: "
+labels: ["type/feature", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve? Why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and out of scope
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - core
+        - rpc
+        - xdr
+        - scval
+        - transactions
+        - events
+        - contract-inspection
+        - testing
+        - security
+        - cli
+        - configuration
+        - github
+        - sarif
+        - observability
+        - documentation
+        - release
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Tests
+      description: What tests would prove this works?
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security considerations
+      description: Does this touch untrusted input, network access, or secrets?
+    validations:
+      required: true
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated complexity
+      options:
+        - trivial
+        - medium
+        - high
+    validations:
+      required: true

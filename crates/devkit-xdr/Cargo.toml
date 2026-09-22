@@ -1,0 +1,15 @@
+[package]
+name = "devkit-xdr"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "XDR, SCVal, transaction, and event inspection utilities for StellarFoundry DevKit."
+
+[dependencies]
+devkit-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+stellar-xdr.workspace = true
+stellar-strkey.workspace = true

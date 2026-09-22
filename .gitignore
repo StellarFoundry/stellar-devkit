@@ -1,0 +1,26 @@
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock.orig
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local artifacts
+dist/
+*.sarif
+*.report.json

@@ -1,0 +1,14 @@
+[package]
+name = "devkit-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Core types, errors, configuration, and network profiles for StellarFoundry DevKit."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+thiserror.workspace = true

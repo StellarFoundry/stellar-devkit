@@ -1,0 +1,18 @@
+[package]
+name = "devkit-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "The `stellar-foundry` command-line interface."
+
+[[bin]]
+name = "stellar-foundry"
+path = "src/main.rs"
+
+[dependencies]
+devkit-core.workspace = true
+devkit-xdr.workspace = true
+clap.workspace = true
+serde_json.workspace = true
