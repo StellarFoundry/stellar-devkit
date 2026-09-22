@@ -13,8 +13,8 @@ check was actually run; **Pending** means it is not done.
 | No secrets in repo | Verified | No secrets; `.gitignore` excludes keys/env |
 | No placeholder/fake implementations | Verified | CLI exposes only working commands |
 | Documentation for public features | Verified | README + docs set |
-| Issue backlog present | Verified | 121 issues on GitHub |
-| Issue complexity honest | Verified | 7 trivial / 86 medium / 28 high |
+| Issue backlog present | Verified | 119 issues on GitHub |
+| Issue complexity honest | Verified | 7 trivial / 84 medium / 28 high |
 | Live RPC transport | Pending | Mock only; tracked as an issue |
 | Contract inspection | Pending | Tracked as an issue |
 | Security analysis + SARIF | Pending | Tracked as issues |
@@ -30,4 +30,4 @@ check was actually run; **Pending** means it is not done.
   "what works today" and marks everything else as planned.
 - No coverage percentage is claimed.
 - No performance number is claimed.
-- Complexity is not inflated to reach a point target.
+- Complexity is not inflated to reach an aggregate reward target.

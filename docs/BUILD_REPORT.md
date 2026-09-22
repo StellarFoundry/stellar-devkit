@@ -56,15 +56,15 @@ No releases yet. No binaries, no crates.io publication.
 
 ## Issue backlog
 
-- **Total open issues:** 121
+- **Total open issues:** 119
 - **Trivial:** 7
-- **Medium:** 86
+- **Medium:** 84
 - **High:** 28
-- **Total pre-multiplier points:** 19,200
 
-The 25,000-point target would require 125 high-complexity issues. The backlog has
-28 genuinely high issues; the rest are honest medium and trivial work. Complexity
-was not inflated to reach a point total. The ~120-issue roadmap target is met.
+Issue complexity is assigned from the scope of each individual issue rather than
+an aggregate reward target. Complexity was not inflated. The backlog reflects the
+project's currently identified implementation work; most of it is **not
+implemented**.
 
 ## Drips readiness
 
@@ -79,7 +79,7 @@ payout are not guaranteed.
   yet (all tracked as issues).
 - JSON output shape is unstable until the versioned schema lands.
 - No MSRV pin; no release automation.
-- The backlog (121 issues) is a roadmap; most of it is **not implemented**.
+- The backlog (119 issues) is a roadmap; most of it is **not implemented**.
 
 ## Recommended next steps
 
