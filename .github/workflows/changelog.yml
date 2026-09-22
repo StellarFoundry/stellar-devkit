@@ -1,0 +1,53 @@
+name: Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_ref:
+        description: Start revision (exclusive); defaults to the latest tag
+        required: false
+        type: string
+      to_ref:
+        description: End revision (inclusive)
+        required: false
+        default: HEAD
+        type: string
+      version:
+        description: Version heading, for example 0.2.0 or Unreleased
+        required: false
+        default: Unreleased
+        type: string
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: changelog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate changelog section
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Generate section (dry run)
+        run: |
+          python tools/changelog.py \
+            --from "${{ github.event.inputs.from_ref }}" \
+            --to "${{ github.event.inputs.to_ref || 'HEAD' }}" \
+            --version "${{ github.event.inputs.version || github.event.release.tag_name || 'Unreleased' }}" \
+            --output build/changelog-section.md
+      - name: Upload generated section
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-section
+          path: build/changelog-section.md
+          if-no-files-found: error
