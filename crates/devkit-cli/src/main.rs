@@ -68,6 +68,11 @@ enum Command {
         /// Base64-encoded XDR `ContractEvent`.
         value: String,
     },
+    /// Validate a Stellar RPC endpoint URL against the security policy.
+    Endpoint {
+        /// The endpoint URL to validate.
+        url: String,
+    },
 }
 
 fn main() -> ExitCode {
@@ -113,6 +118,16 @@ fn run(cli: Cli) -> Result<u8, (u8, String)> {
             print_value(format, &xdr::summary("contract_event", &decoded));
             Ok(EXIT_SUCCESS)
         }
+        Command::Endpoint { url } => {
+            let endpoint = devkit_rpc::Endpoint::parse(&url).map_err(runtime)?;
+            let report = serde_json::json!({
+                "valid": true,
+                "url": endpoint.as_str(),
+                "loopback": endpoint.is_loopback(),
+            });
+            print_value(format, &report);
+            Ok(EXIT_SUCCESS)
+        }
     }
 }
 
@@ -130,9 +145,10 @@ fn doctor(format: OutputFormat) {
     let report = serde_json::json!({
         "tool": TOOL_NAME,
         "version": VERSION,
-        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event"],
+        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event", "endpoint_validation"],
         "networks": networks,
         "network_access": "none (offline decoding only)",
+        "rpc_transport": "mock only (no live transport yet)",
     });
     print_value(format, &report);
 }

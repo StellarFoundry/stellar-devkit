@@ -14,5 +14,6 @@ path = "src/main.rs"
 [dependencies]
 devkit-core.workspace = true
 devkit-xdr.workspace = true
+devkit-rpc.workspace = true
 clap.workspace = true
 serde_json.workspace = true

@@ -14,7 +14,10 @@
 - `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and
   `ContractEvent` to JSON; strkey classification.
 - `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`,
-  `event`; terminal/JSON output; exit codes 0/2/3.
+  `event`, `endpoint`; terminal/JSON output; exit codes 0/2/3.
+- `devkit-rpc`: typed RPC protocol layer with an injectable transport, a
+  deterministic mock, endpoint validation, typed health/network/latest-ledger
+  results, and a retry policy. **No live network transport yet.**
 - CI: fmt, clippy, tests on Linux/Windows/macOS.
 - Docs: ecosystem research, architecture, getting started, CLI, roadmap, this
   file.

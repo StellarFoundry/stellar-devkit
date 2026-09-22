@@ -1,0 +1,14 @@
+[package]
+name = "devkit-rpc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Typed Stellar RPC protocol layer with an injectable transport for deterministic tests."
+
+[dependencies]
+devkit-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+url = "2"

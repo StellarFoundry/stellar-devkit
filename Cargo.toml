@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/devkit-core",
     "crates/devkit-xdr",
+    "crates/devkit-rpc",
     "crates/devkit-cli",
 ]
 
@@ -27,6 +28,7 @@ stellar-strkey = "0.0.18"
 
 devkit-core = { path = "crates/devkit-core", version = "0.1.0" }
 devkit-xdr = { path = "crates/devkit-xdr", version = "0.1.0" }
+devkit-rpc = { path = "crates/devkit-rpc", version = "0.1.0" }
 
 [profile.release]
 lto = "thin"
