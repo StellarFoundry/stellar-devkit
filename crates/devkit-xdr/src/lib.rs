@@ -13,9 +13,28 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use stellar_xdr::{ContractEvent, Limits, ReadXdr, ScVal, TransactionEnvelope};
 
-/// The maximum nesting/size limit applied when decoding untrusted XDR.
+/// Maximum recursion depth applied when decoding untrusted XDR.
+///
+/// Bounds stack usage for deeply nested values.
+const MAX_DECODE_DEPTH: u32 = 128;
+
+/// Maximum number of XDR bytes consumed when decoding untrusted input (16 MiB).
+///
+/// The `stellar-xdr` reader charges every byte it reads against this limit and
+/// rejects a declared length that would exceed it *before* allocating, so a
+/// crafted length prefix cannot trigger an unbounded allocation.
+const MAX_DECODE_LEN: usize = 16 * 1024 * 1024;
+
+/// The limits applied when decoding untrusted XDR.
+///
+/// `Limits::none()` disables all limits (`depth`/`len` = `MAX`), which lets a
+/// crafted length prefix request an enormous allocation: a memory-exhaustion
+/// denial of service. We bound both size and depth instead.
 fn limits() -> Limits {
-    Limits::none()
+    Limits {
+        depth: MAX_DECODE_DEPTH,
+        len: MAX_DECODE_LEN,
+    }
 }
 
 /// A decoded Stellar strkey with its kind.
@@ -119,5 +138,33 @@ mod tests {
             stellar_strkey::Strkey::Contract(stellar_strkey::Contract([0u8; 32])).to_string();
         let info = describe_strkey(&contract).unwrap();
         assert_eq!(info.kind, "contract");
+    }
+
+    #[test]
+    fn limits_are_bounded() {
+        let limits = limits();
+        assert!(
+            limits.len < usize::MAX,
+            "decode length limit must be finite"
+        );
+        assert!(limits.depth < u32::MAX, "decode depth limit must be finite");
+    }
+
+    #[test]
+    fn rejects_oversized_scval_from_fuzzer_without_exhausting_memory() {
+        // Regression input captured by the `decode_scval` cargo-fuzz target that
+        // triggered an OOM under unbounded limits. With bounded limits the
+        // decoder must reject it instead of allocating unbounded memory.
+        let bytes: &[u8] = &[
+            0x0c, 0x41, 0x41, 0x41, 0x41, 0x46, 0x73, 0x0c, 0x41, 0x41, 0x41, 0x41, 0x46, 0x68,
+            0x41, 0x42, 0x33, 0x41, 0x44, 0x44, 0x44, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+            0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44,
+            0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44,
+            0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x00, 0x00, 0x00, 0x20, 0x41, 0x01,
+            0x0e,
+        ];
+        let input = std::str::from_utf8(bytes).expect("fuzz input is valid utf-8");
+        let err = inspect_scval_base64(input).unwrap_err();
+        assert!(matches!(err, DevkitError::Decode(_)));
     }
 }

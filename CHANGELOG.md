@@ -33,3 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   weekly bounded scheduled workflow (see `docs/TESTING.md`).
 - Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
   pull-request and issue templates.
+
+### Fixed
+
+- `devkit-xdr`: decoding now applies bounded reader limits instead of
+  `Limits::none()`. A crafted XDR length prefix can no longer request an
+  unbounded allocation (memory-exhaustion denial of service); such inputs are
+  rejected as a structured decode error. Found by the `decode_scval` fuzz target.
