@@ -11,7 +11,7 @@ cargo test --all
 ```
 
 Unit and integration tests live next to the code (`#[cfg(test)]` modules) and in
-`tests/`. Decoding changes must include malformed-input tests.
+`tests/`. Decoding changes must include malformed-input tests. The shared `fixtures/malformed/` corpus contains small, named samples for truncated XDR, invalid discriminants, empty input, and an overlong length prefix. `crates/devkit-xdr/tests/malformed_corpus.rs` runs each fixture through its intended decoder and requires a structured `DevkitError::Decode`; an unexpected successful decode or panic fails the test.
 
 ## Fuzzing
 
