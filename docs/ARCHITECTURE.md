@@ -106,3 +106,7 @@ explicitly states that network access is disabled.
 - Round-trip tests construct XDR values, encode them, decode them, and assert
   the result — no external fixtures required for correctness.
 - Fixture-based and fuzz testing are planned (issues) once the schema stabilizes.
+
+## RPC response safety limits
+
+The RPC client rejects response values whose compact JSON representation would exceed 4 MiB or whose nesting exceeds 64 levels. Typed response models require their non-optional fields; schema failures return `DevkitError::Decode` and are not retried as transport failures. Unknown fields remain tolerated for forward compatibility with Stellar RPC additions. The current transport abstraction receives an already-parsed `serde_json::Value`, so these limits protect downstream processing but cannot cap memory used by a future transport while parsing raw bytes; a live transport must enforce the byte cap before parsing as well.
