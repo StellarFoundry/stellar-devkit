@@ -258,7 +258,9 @@ fn measure_json_string(value: &str) -> Result<usize, DevkitError> {
 }
 
 fn checked_response_size(current: usize, additional: usize) -> Result<usize, DevkitError> {
-    let size = current.checked_add(additional).ok_or_else(response_too_large)?;
+    let size = current
+        .checked_add(additional)
+        .ok_or_else(response_too_large)?;
     if size > MAX_RPC_RESPONSE_BYTES {
         return Err(response_too_large());
     }
