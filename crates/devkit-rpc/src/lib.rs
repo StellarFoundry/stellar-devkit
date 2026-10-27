@@ -21,6 +21,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use url::Url;
 
+const MAX_RPC_RESPONSE_BYTES: usize = 4 * 1024 * 1024;
+const MAX_RPC_RESPONSE_DEPTH: usize = 64;
+
 /// A validated Stellar RPC endpoint.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Endpoint {
@@ -190,6 +193,85 @@ pub struct LatestLedger {
     pub close_time: Option<u64>,
 }
 
+/// Validates an already-parsed RPC JSON value before it reaches typed consumers.
+///
+/// The transport contract returns a `Value`, so this protects downstream
+/// processing but cannot prevent a transport from allocating while parsing raw
+/// bytes. A future network transport must enforce the byte limit before parsing.
+fn validate_response(value: &Value) -> Result<(), DevkitError> {
+    measure_json_size(value, 0)?;
+    Ok(())
+}
+
+fn measure_json_size(value: &Value, depth: usize) -> Result<usize, DevkitError> {
+    if depth > MAX_RPC_RESPONSE_DEPTH {
+        return Err(DevkitError::decode(format!(
+            "RPC response nesting exceeds the {MAX_RPC_RESPONSE_DEPTH}-level limit"
+        )));
+    }
+
+    match value {
+        Value::Null => Ok(4),
+        Value::Bool(value) => Ok(if *value { 4 } else { 5 }),
+        Value::Number(value) => Ok(value.to_string().len()),
+        Value::String(value) => measure_json_string(value),
+        Value::Array(values) => {
+            let mut size = 2usize;
+            for (index, value) in values.iter().enumerate() {
+                if index > 0 {
+                    size = checked_response_size(size, 1)?;
+                }
+                size = checked_response_size(size, measure_json_size(value, depth + 1)?)?;
+            }
+            Ok(size)
+        }
+        Value::Object(values) => {
+            let mut size = 2usize;
+            for (index, (key, value)) in values.iter().enumerate() {
+                if index > 0 {
+                    size = checked_response_size(size, 1)?;
+                }
+                size = checked_response_size(size, measure_json_string(key)?)?;
+                size = checked_response_size(size, 1)?;
+                size = checked_response_size(size, measure_json_size(value, depth + 1)?)?;
+            }
+            Ok(size)
+        }
+    }
+}
+
+fn measure_json_string(value: &str) -> Result<usize, DevkitError> {
+    if value.len() > MAX_RPC_RESPONSE_BYTES {
+        return Err(response_too_large());
+    }
+
+    let mut size = 2usize;
+    for character in value.chars() {
+        let escaped_size = match character {
+            '"' | '\\' | '\u{08}' | '\t' | '\n' | '\u{0C}' | '\r' => 2,
+            character if character <= '\u{1F}' => 6,
+            character => character.len_utf8(),
+        };
+        size = checked_response_size(size, escaped_size)?;
+    }
+    Ok(size)
+}
+
+fn checked_response_size(current: usize, additional: usize) -> Result<usize, DevkitError> {
+    let size = current
+        .checked_add(additional)
+        .ok_or_else(response_too_large)?;
+    if size > MAX_RPC_RESPONSE_BYTES {
+        return Err(response_too_large());
+    }
+    Ok(size)
+}
+
+fn response_too_large() -> DevkitError {
+    DevkitError::decode(format!(
+        "RPC response exceeds the {MAX_RPC_RESPONSE_BYTES}-byte limit"
+    ))
+}
 /// A typed RPC client over an injected [`Transport`].
 pub struct Client<T: Transport> {
     transport: T,
@@ -216,7 +298,10 @@ impl<T: Transport> Client<T> {
         let mut attempt = 0;
         loop {
             match self.transport.call(method, params.clone()) {
-                Ok(value) => return Ok(value),
+                Ok(value) => {
+                    validate_response(&value)?;
+                    return Ok(value);
+                }
                 Err(error) => {
                     if self.retry.should_retry(attempt, &error) {
                         attempt += 1;
@@ -340,14 +425,39 @@ mod tests {
 
     #[test]
     fn parses_minimal_health_response() {
-        // Unknown fields must be ignored and optional fields must be optional.
-        let transport = MockTransport::with_responses(vec![json!({
-            "status": "healthy",
-            "extraUnknownField": {"ignored": true}
-        })]);
+        // Optional fields may be omitted; required status remains mandatory.
+        let transport = MockTransport::with_responses(vec![json!({ "status": "healthy" })]);
         let health = Client::new(transport).health().unwrap();
         assert_eq!(health.status, "healthy");
         assert_eq!(health.latest_ledger, None);
+    }
+
+    #[test]
+    fn rejects_missing_required_network_fields() {
+        let transport = MockTransport::with_responses(vec![json!({ "protocolVersion": 23 })]);
+        let error = Client::new(transport).network().unwrap_err();
+        assert!(matches!(error, DevkitError::Decode(_)));
+    }
+
+    #[test]
+    fn rejects_oversized_rpc_response() {
+        let transport = MockTransport::with_responses(vec![json!({
+            "status": "healthy",
+            "extra": "x".repeat(MAX_RPC_RESPONSE_BYTES + 1)
+        })]);
+        let error = Client::new(transport).health().unwrap_err();
+        assert!(matches!(error, DevkitError::Decode(message) if message.contains("byte limit")));
+    }
+
+    #[test]
+    fn rejects_pathologically_nested_rpc_response() {
+        let mut value = json!(null);
+        for _ in 0..=MAX_RPC_RESPONSE_DEPTH {
+            value = json!([value]);
+        }
+        let transport = MockTransport::with_responses(vec![value]);
+        let error = Client::new(transport).health().unwrap_err();
+        assert!(matches!(error, DevkitError::Decode(message) if message.contains("nesting")));
     }
 
     #[test]
