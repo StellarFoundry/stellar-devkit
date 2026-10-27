@@ -46,6 +46,21 @@ When `-` is supplied, stdin must be piped or redirected; the CLI never waits for
 | 2 | Usage error |
 | 3 | Runtime error (decode failure, I/O) |
 
+## Structured errors
+
+When `--format json` is selected, errors are written to stderr as one JSON object:
+
+```json
+{
+  "error": {
+    "category": "decode",
+    "message": "decode error: ..."
+  }
+}
+```
+
+The category is one of `usage`, `decode`, `encode`, `invalid_input`, `configuration`, `io`, or `internal`. Process exit codes remain unchanged (2 for usage errors and 3 for runtime errors). Command-line parse errors use a generic JSON message so supplied argument text is not echoed into logs. Successful output remains on stdout; error JSON is on stderr.
+
 ## Output stability
 
 - `terminal` output is human-oriented and may change.
