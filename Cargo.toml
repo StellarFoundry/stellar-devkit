@@ -10,6 +10,7 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.91"
 license = "Apache-2.0"
 authors = ["StellarFoundry"]
 repository = "https://github.com/StellarFoundry/stellar-devkit"
