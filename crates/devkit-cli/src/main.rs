@@ -5,7 +5,10 @@
 //! * `2` usage error
 //! * `3` runtime error (decode failure, I/O)
 
-use std::process::ExitCode;
+use std::{
+    io::{self, IsTerminal, Read},
+    process::ExitCode,
+};
 
 use clap::{Parser, Subcommand, ValueEnum};
 use devkit_core::{Network, OutputFormat, TOOL_NAME, VERSION};
@@ -14,6 +17,7 @@ use devkit_xdr as xdr;
 const EXIT_SUCCESS: u8 = 0;
 const EXIT_USAGE: u8 = 2;
 const EXIT_ERROR: u8 = 3;
+const MAX_STDIN_BYTES: usize = 16 * 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum FormatArg {
@@ -104,16 +108,19 @@ fn run(cli: Cli) -> Result<u8, (u8, String)> {
             Ok(EXIT_SUCCESS)
         }
         Command::Scval { value } => {
+            let value = read_value(value)?;
             let decoded = xdr::inspect_scval_base64(&value).map_err(runtime)?;
             print_value(format, &xdr::summary("scval", &decoded));
             Ok(EXIT_SUCCESS)
         }
         Command::Envelope { value } => {
+            let value = read_value(value)?;
             let decoded = xdr::inspect_envelope_base64(&value).map_err(runtime)?;
             print_value(format, &xdr::summary("transaction_envelope", &decoded));
             Ok(EXIT_SUCCESS)
         }
         Command::Event { value } => {
+            let value = read_value(value)?;
             let decoded = xdr::inspect_event_base64(&value).map_err(runtime)?;
             print_value(format, &xdr::summary("contract_event", &decoded));
             Ok(EXIT_SUCCESS)
@@ -151,6 +158,36 @@ fn doctor(format: OutputFormat) {
         "rpc_transport": "mock only (no live transport yet)",
     });
     print_value(format, &report);
+}
+
+/// Resolve a decode argument, reading bounded UTF-8 input only when explicitly asked.
+fn read_value(value: String) -> Result<String, (u8, String)> {
+    if value != "-" {
+        return Ok(value);
+    }
+
+    let stdin = io::stdin();
+    if stdin.is_terminal() {
+        return Err((
+            EXIT_USAGE,
+            "input '-' requires piped or redirected stdin".to_string(),
+        ));
+    }
+
+    let mut input = String::new();
+    stdin
+        .take(MAX_STDIN_BYTES as u64 + 1)
+        .read_to_string(&mut input)
+        .map_err(|error| (EXIT_ERROR, format!("failed to read stdin: {error}")))?;
+
+    if input.len() > MAX_STDIN_BYTES {
+        return Err((
+            EXIT_ERROR,
+            format!("stdin input exceeds the {MAX_STDIN_BYTES}-byte limit"),
+        ));
+    }
+
+    Ok(input)
 }
 
 fn print_value(format: OutputFormat, value: &serde_json::Value) {

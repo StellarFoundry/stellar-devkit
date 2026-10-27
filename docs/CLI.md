@@ -24,17 +24,19 @@ and default RPC endpoints), and a statement that network access is disabled.
 Validates a Stellar strkey and reports its kind (`account`, `contract`, or
 `other`). Invalid input is a decode error.
 
-### `scval <BASE64>`
+### `scval <BASE64|->`
 
-Decodes a base64 XDR `ScVal` into JSON.
+Decodes a base64 XDR `ScVal` into JSON. Pass `-` to read one value from stdin, for example `printf 'AAAAAwAAACo=' | stellar-foundry --format json scval -`.
 
-### `envelope <BASE64>`
+### `envelope <BASE64|->`
 
-Decodes a base64 XDR `TransactionEnvelope` into JSON.
+Decodes a base64 XDR `TransactionEnvelope` into JSON. Pass `-` to read one value from stdin.
 
-### `event <BASE64>`
+### `event <BASE64|->`
 
-Decodes a base64 XDR `ContractEvent` into JSON.
+Decodes a base64 XDR `ContractEvent` into JSON. Pass `-` to read one value from stdin.
+
+When `-` is supplied, stdin must be piped or redirected; the CLI never waits for interactive terminal input. Input is limited to 16 MiB and must be valid UTF-8. Only one value is read; streaming multiple values is not supported.
 
 ## Exit codes
 
