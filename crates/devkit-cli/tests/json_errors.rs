@@ -11,9 +11,13 @@ fn run_cli(args: &[&str]) -> Output {
 fn decode_error_uses_structured_json_and_keeps_exit_code() {
     let output = run_cli(&["--format", "json", "scval", "not-valid-base64!!!"]);
     assert_eq!(output.status.code(), Some(3));
-    let value: serde_json::Value = serde_json::from_slice(&output.stderr).expect("JSON error on stderr");
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stderr).expect("JSON error on stderr");
     assert_eq!(value["error"]["category"], "decode");
-    assert!(value["error"]["message"].as_str().unwrap().contains("decode error"));
+    assert!(value["error"]["message"]
+        .as_str()
+        .unwrap()
+        .contains("decode error"));
     assert!(output.stdout.is_empty());
 }
 
@@ -21,9 +25,13 @@ fn decode_error_uses_structured_json_and_keeps_exit_code() {
 fn usage_error_uses_structured_json_without_echoing_arguments() {
     let output = run_cli(&["--format", "json", "scval"]);
     assert_eq!(output.status.code(), Some(2));
-    let value: serde_json::Value = serde_json::from_slice(&output.stderr).expect("JSON usage error on stderr");
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stderr).expect("JSON usage error on stderr");
     assert_eq!(value["error"]["category"], "usage");
-    assert!(value["error"]["message"].as_str().unwrap().contains("invalid command-line"));
+    assert!(value["error"]["message"]
+        .as_str()
+        .unwrap()
+        .contains("invalid command-line"));
     assert!(output.stdout.is_empty());
 }
 
