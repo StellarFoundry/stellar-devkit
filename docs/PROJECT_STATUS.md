@@ -18,7 +18,8 @@
 - `devkit-rpc`: typed RPC protocol layer with an injectable transport, a
   deterministic mock, endpoint validation, typed health/network/latest-ledger
   results, and a retry policy. **No live network transport yet.**
-- CI: fmt, clippy, tests on Linux/Windows/macOS.
+- CI: fmt, clippy, tests on Linux/Windows/macOS, plus a Rust 1.91.0 MSRV job and scheduled fuzz smoke tests.
+- Dependency security: a RustSec `cargo audit` workflow now runs for lockfile/manifest changes and weekly.
 - Docs: ecosystem research, architecture, getting started, CLI, roadmap, this
   file.
 - Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
@@ -49,7 +50,7 @@
 - Decoding uses a permissive limit today; a stricter, configurable limit is
   planned.
 - No network functionality exists; `doctor` states this explicitly.
-- No MSRV is pinned yet.
+- The workspace declares Rust 1.91 as its minimum supported version; CI tests on Rust 1.91.0.
 - `devkit-core` has no configuration loader yet.
 
 ## Security status
