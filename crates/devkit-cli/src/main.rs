@@ -5,7 +5,10 @@
 //! * `2` usage error
 //! * `3` runtime error (decode failure, I/O)
 
-use std::{io::{self, IsTerminal, Read}, process::ExitCode};
+use std::{
+    io::{self, IsTerminal, Read},
+    process::ExitCode,
+};
 
 use clap::{Parser, Subcommand, ValueEnum};
 use devkit_core::{Network, OutputFormat, TOOL_NAME, VERSION};
