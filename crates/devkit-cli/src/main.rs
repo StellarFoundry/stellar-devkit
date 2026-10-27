@@ -79,18 +79,72 @@ enum Command {
     },
 }
 
+#[derive(Debug)]
+struct CliError {
+    code: u8,
+    category: &'static str,
+    message: String,
+}
+
+impl CliError {
+    fn new(code: u8, category: &'static str, message: impl Into<String>) -> Self {
+        Self { code, category, message: message.into() }
+    }
+}
+
 fn main() -> ExitCode {
-    let cli = Cli::parse();
+    let args: Vec<String> = std::env::args().collect();
+    let json_errors = requests_json_format(&args);
+    let cli = match Cli::try_parse_from(args) {
+        Ok(cli) => cli,
+        Err(error) => {
+            use clap::error::ErrorKind;
+            if matches!(error.kind(), ErrorKind::DisplayHelp | ErrorKind::DisplayVersion) {
+                print!("{error}");
+                return ExitCode::SUCCESS;
+            }
+
+            if json_errors {
+                print_json_error("usage", "invalid command-line arguments; run --help for usage");
+            } else {
+                eprint!("{error}");
+            }
+            return ExitCode::from(EXIT_USAGE);
+        }
+    };
+
+    let format: OutputFormat = cli.format.into();
     match run(cli) {
         Ok(code) => ExitCode::from(code),
-        Err((code, message)) => {
-            eprintln!("error: {message}");
-            ExitCode::from(code)
+        Err(error) => {
+            if format == OutputFormat::Json {
+                print_json_error(error.category, &error.message);
+            } else {
+                eprintln!("error: {}", error.message);
+            }
+            ExitCode::from(error.code)
         }
     }
 }
 
-fn run(cli: Cli) -> Result<u8, (u8, String)> {
+fn requests_json_format(args: &[String]) -> bool {
+    args.windows(2).any(|pair| pair[0] == "--format" && pair[1] == "json")
+        || args.iter().any(|arg| arg == "--format=json")
+}
+
+fn print_json_error(category: &str, message: &str) {
+    eprintln!(
+        "{}",
+        serde_json::json!({
+            "error": {
+                "category": category,
+                "message": message
+            }
+        })
+    );
+}
+
+fn run(cli: Cli) -> Result<u8, CliError> {
     let format: OutputFormat = cli.format.into();
     match cli.command {
         Command::Version => {
@@ -103,7 +157,7 @@ fn run(cli: Cli) -> Result<u8, (u8, String)> {
         }
         Command::Strkey { value } => {
             let info = xdr::describe_strkey(&value).map_err(runtime)?;
-            let json = serde_json::to_value(&info).map_err(|e| (EXIT_ERROR, e.to_string()))?;
+            let json = serde_json::to_value(&info).map_err(|e| CliError::new(EXIT_ERROR, "internal", e.to_string()))?;
             print_value(format, &json);
             Ok(EXIT_SUCCESS)
         }
@@ -161,16 +215,17 @@ fn doctor(format: OutputFormat) {
 }
 
 /// Resolve a decode argument, reading bounded UTF-8 input only when explicitly asked.
-fn read_value(value: String) -> Result<String, (u8, String)> {
+fn read_value(value: String) -> Result<String, CliError> {
     if value != "-" {
         return Ok(value);
     }
 
     let stdin = io::stdin();
     if stdin.is_terminal() {
-        return Err((
+        return Err(CliError::new(
             EXIT_USAGE,
-            "input '-' requires piped or redirected stdin".to_string(),
+            "usage",
+            "input '-' requires piped or redirected stdin",
         ));
     }
 
@@ -178,11 +233,12 @@ fn read_value(value: String) -> Result<String, (u8, String)> {
     stdin
         .take(MAX_STDIN_BYTES as u64 + 1)
         .read_to_string(&mut input)
-        .map_err(|error| (EXIT_ERROR, format!("failed to read stdin: {error}")))?;
+        .map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to read stdin: {error}")))?;
 
     if input.len() > MAX_STDIN_BYTES {
-        return Err((
+        return Err(CliError::new(
             EXIT_ERROR,
+            "invalid_input",
             format!("stdin input exceeds the {MAX_STDIN_BYTES}-byte limit"),
         ));
     }
@@ -202,11 +258,14 @@ fn print_value(format: OutputFormat, value: &serde_json::Value) {
     }
 }
 
-fn runtime(error: devkit_core::DevkitError) -> (u8, String) {
-    (EXIT_ERROR, error.to_string())
-}
-
-#[allow(dead_code)]
-fn usage(message: impl Into<String>) -> (u8, String) {
-    (EXIT_USAGE, message.into())
+fn runtime(error: devkit_core::DevkitError) -> CliError {
+    use devkit_core::DevkitError;
+    let category = match &error {
+        DevkitError::Decode(_) => "decode",
+        DevkitError::Encode(_) => "encode",
+        DevkitError::InvalidInput(_) => "invalid_input",
+        DevkitError::Config(_) => "configuration",
+        DevkitError::Io(_) => "io",
+    };
+    CliError::new(EXIT_ERROR, category, error.to_string())
 }
