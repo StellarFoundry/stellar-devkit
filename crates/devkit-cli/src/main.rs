@@ -88,7 +88,11 @@ struct CliError {
 
 impl CliError {
     fn new(code: u8, category: &'static str, message: impl Into<String>) -> Self {
-        Self { code, category, message: message.into() }
+        Self {
+            code,
+            category,
+            message: message.into(),
+        }
     }
 }
 
@@ -99,13 +103,19 @@ fn main() -> ExitCode {
         Ok(cli) => cli,
         Err(error) => {
             use clap::error::ErrorKind;
-            if matches!(error.kind(), ErrorKind::DisplayHelp | ErrorKind::DisplayVersion) {
+            if matches!(
+                error.kind(),
+                ErrorKind::DisplayHelp | ErrorKind::DisplayVersion
+            ) {
                 print!("{error}");
                 return ExitCode::SUCCESS;
             }
 
             if json_errors {
-                print_json_error("usage", "invalid command-line arguments; run --help for usage");
+                print_json_error(
+                    "usage",
+                    "invalid command-line arguments; run --help for usage",
+                );
             } else {
                 eprint!("{error}");
             }
@@ -128,7 +138,8 @@ fn main() -> ExitCode {
 }
 
 fn requests_json_format(args: &[String]) -> bool {
-    args.windows(2).any(|pair| pair[0] == "--format" && pair[1] == "json")
+    args.windows(2)
+        .any(|pair| pair[0] == "--format" && pair[1] == "json")
         || args.iter().any(|arg| arg == "--format=json")
 }
 
@@ -157,7 +168,8 @@ fn run(cli: Cli) -> Result<u8, CliError> {
         }
         Command::Strkey { value } => {
             let info = xdr::describe_strkey(&value).map_err(runtime)?;
-            let json = serde_json::to_value(&info).map_err(|e| CliError::new(EXIT_ERROR, "internal", e.to_string()))?;
+            let json = serde_json::to_value(&info)
+                .map_err(|e| CliError::new(EXIT_ERROR, "internal", e.to_string()))?;
             print_value(format, &json);
             Ok(EXIT_SUCCESS)
         }
@@ -233,7 +245,9 @@ fn read_value(value: String) -> Result<String, CliError> {
     stdin
         .take(MAX_STDIN_BYTES as u64 + 1)
         .read_to_string(&mut input)
-        .map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to read stdin: {error}")))?;
+        .map_err(|error| {
+            CliError::new(EXIT_ERROR, "io", format!("failed to read stdin: {error}"))
+        })?;
 
     if input.len() > MAX_STDIN_BYTES {
         return Err(CliError::new(
