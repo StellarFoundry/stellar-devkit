@@ -17,8 +17,8 @@ Audit date: 2026-10-28. Commit: `aec759c`.
 | No secrets in repo | Verified | No secrets; `.gitignore` excludes keys/env |
 | No placeholder/fake implementations | Verified | CLI exposes only commands that do real work |
 | Documentation for public features | Verified | README plus the `docs/` set |
-| Issue backlog present | Verified | 112 open issues |
-| Issue complexity honest | Verified | 7 trivial / 78 medium / 27 high |
+| Issue backlog present | Verified | 110 open issues |
+| Issue complexity honest | Verified | 6 trivial / 78 medium / 26 high |
 | Live RPC transport | Verified | `devkit_rpc::HttpTransport`; `rpc-health`; CI tests |
 | Contract inspection | Verified | `inspect-wasm`; `devkit-contract` tests |
 | Security analysis + SARIF | Verified (structural) | `devkit-analysis`; `analyze-wasm --format sarif` |

@@ -72,10 +72,10 @@ No releases yet. No tagged release, binaries, or crates.io publication.
 
 ## Issue backlog
 
-- **Total open issues:** 112
-- **Trivial:** 7
+- **Total open issues:** 110
+- **Trivial:** 6
 - **Medium:** 78
-- **High:** 27
+- **High:** 26
 
 Issue complexity is assigned from the scope of each individual issue rather than
 an aggregate reward target. Complexity was not inflated. Most of the backlog is

@@ -94,10 +94,10 @@ exact scope.
 
 ## Issue quality and backlog
 
-There are 112 open issues: 82 Drips-ready, 24 blocked, 3 needing revision, and 3
-deferred. Five of the 82 are implemented or partially implemented on `main` and
-are excluded from the Wave board pending closure or re-scope (#1, #7, #20, #25,
-#33). The audit and manifest are regenerated from live GitHub issue numbers:
+There are 110 open issues: 77 Drips-ready, 24 blocked, 6 needing revision, and 3
+deferred. #20 and #33 were closed as completed after the merge; #1, #7, and #25
+are partially implemented and marked `status/needs-revision`. The audit and
+manifest are regenerated from live GitHub issue numbers:
 
 - [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md)
 - [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md)

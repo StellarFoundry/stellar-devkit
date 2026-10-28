@@ -3,9 +3,9 @@
 Generated from `tools/backlog/issues_*.json`. Closed and superseded
 definitions are excluded.
 
-**Total open issues:** 112
+**Total open issues:** 110
 
-Complexity: 7 trivial, 78 medium, 27 high.
+Complexity: 6 trivial, 78 medium, 26 high.
 
 ## phase/01-foundation
 
@@ -106,7 +106,6 @@ Complexity: 7 trivial, 78 medium, 27 high.
 
 | # | Title | Area | Complexity | Dependencies |
 | - | ----- | ---- | ---------- | ------------ |
-| #20 | test(security): add a fuzz target for XDR and SCVal decoding | security | high | None. |
 | #21 | feat(security): harden the HTTP transport against SSRF and unsafe redirects | rpc | high | Live transport issue. |
 | #22 | feat(security): redact secrets in logs and output | security | medium | None. |
 | #78 | feat(security): design and implement the rule engine architecture | security | high | Severity/Confidence models. |
@@ -127,7 +126,6 @@ Complexity: 7 trivial, 78 medium, 27 high.
 | #10 | feat(core): add structured logging with levels | core | medium | None. |
 | #30 | feat(cli): add shell completion generation | cli | trivial | None. |
 | #32 | feat(cli): add config init, show, and validate subcommands | cli | medium | Configuration system issue. |
-| #33 | test(cli): assert the exit-code contract | cli | trivial | None. |
 | #96 | feat(cli): unify global flags across commands | cli | medium | None. |
 | #97 | feat(cli): improve error presentation with suggestions | cli | medium | Secret redaction issue. |
 | #98 | feat(cli): add verbosity control | cli | trivial | Structured logging issue. |
@@ -189,9 +187,9 @@ Complexity: 7 trivial, 78 medium, 27 high.
 | phase/04-analysis | 15 |
 | phase/05-contracts | 10 |
 | phase/06-testing | 7 |
-| phase/07-security | 12 |
-| phase/08-cli | 8 |
+| phase/07-security | 11 |
+| phase/08-cli | 7 |
 | phase/09-github | 10 |
 | phase/10-observability | 5 |
 | phase/12-release | 7 |
-| **Total** | **112** |
+| **Total** | **110** |

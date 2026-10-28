@@ -3,10 +3,10 @@
 Generated from `tools/backlog/issues_*.json`. The GitHub issue numbers are
 assigned on creation; titles are the stable identifier.
 
-- **Total issues:** 112
-- **Trivial:** 7
+- **Total issues:** 110
+- **Trivial:** 6
 - **Medium:** 78
-- **High:** 27
+- **High:** 26
 
 Complexity is assigned from the scope of each individual issue, not from an
 aggregate reward target. Drips determines applicable points and budgets
@@ -19,7 +19,6 @@ through its own system.
 | #98 | feat(cli): add verbosity control | cli | trivial | Structured logging issue. | yes | yes | yes |
 | #76 | feat(ledger): add ledger sequence and close-time helpers | rpc | trivial | None. | yes | yes | yes |
 | #6 | feat(rpc): add a typed model for getFeeStats | rpc | trivial | None. | yes | yes | yes |
-| #33 | test(cli): assert the exit-code contract | cli | trivial | None. | yes | yes | yes |
 | #40 | test(core): add deterministic snapshot tests for core types | core | trivial | Error taxonomy issue. | yes | yes | yes |
 | #105 | chore(ci): add triage automation for issues and pull requests | github | medium | None. | yes | yes | yes |
 | #34 | ci(msrv): pin and test a minimum supported Rust version | release | medium | None. | yes | yes | yes |
@@ -125,7 +124,6 @@ through its own system.
 | #12 | feat(xdr): define a versioned JSON schema for decoded values | xdr | high | None. | yes | yes | yes |
 | #93 | test(contracts): add fixture WASM contracts | contract-inspection | high | WASM spec extraction issue. | yes | yes | yes |
 | #47 | test(rpc): add a local integration test server | rpc | high | Live transport issue. | yes | yes | yes |
-| #20 | test(security): add a fuzz target for XDR and SCVal decoding | security | high | None. | yes | yes | yes |
 
 ## Notes
 

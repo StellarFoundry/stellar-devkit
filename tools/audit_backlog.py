@@ -49,6 +49,9 @@ DEFERRED = {
 }
 # Needs revision before it is Wave-ready.
 NEEDS_REVISION = {
+    1: "HTTP transport exists; re-scope to official stellar-rpc-client integration",
+    7: "configuration exists; add an explicit precedence test",
+    25: "contractspecv0 decoding exists; add a fixture-WASM spec test and normalized ABI",
     55: "must cite the documented symbol/string/bytes length limits",
     76: "close-time estimation needs a precise, documented definition",
     110: "must justify the cache with a measured workload (measure first)",
@@ -185,9 +188,9 @@ def main() -> int:
         f"| Defer | {counts.get('Defer / future work', 0)} |",
         f"| Blocked | {counts.get('Blocked by dependency', 0)} |",
         "",
-        f"> **Post-merge note ({datetime.date.today().isoformat()}):** #1, #7, #20, #25,",
-        "> and #33 have merged or partial implementation on `main` and are excluded",
-        "> from `docs/WAVE_BOARD.md` pending maintainer closure or re-scope.",
+        f"> **Post-merge note ({datetime.date.today().isoformat()}):** #20 and #33 were",
+        "> implemented in the merged work and closed. #1, #7, and #25 are partially",
+        "> implemented and marked `status/needs-revision`. See `docs/WAVE_BOARD.md`.",
         "",
         "No issue required splitting: the largest issues are already scoped to a single",
         "capability, and the previously broad areas had already been decomposed.",

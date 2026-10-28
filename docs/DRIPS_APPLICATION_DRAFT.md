@@ -69,10 +69,10 @@ reason and confirm dates in the Drips dashboard.
 
 ## Contributor opportunities
 
-The backlog contains 112 open issues: 82 Drips-ready, 24 blocked by dependencies,
-3 needing revision, and 3 deferred. Five of the 82 are implemented or partially
-implemented on `main` and are excluded from the board pending closure or re-scope
-(#1, #7, #20, #25, #33). [WAVE_BOARD.md](WAVE_BOARD.md) curates 20 independent,
+The backlog contains 110 open issues: 77 Drips-ready, 24 blocked by dependencies,
+6 needing revision, and 3 deferred. #20 and #33 were closed as completed after the
+merge; #1, #7, and #25 are partially implemented and marked
+`status/needs-revision`. [WAVE_BOARD.md](WAVE_BOARD.md) curates 20 independent,
 Wave-sized issues (3 trivial, 13 medium, 4 high; 3,050 points).
 Backlog issues are proposed work, not completed functionality. Check current
 issue states and assignment requirements before describing specific issues as
