@@ -215,14 +215,20 @@ fn run(cli: Cli) -> Result<u8, CliError> {
                 println!("{}", devkit_analysis::to_sarif(&findings, Some(&path)));
             } else {
                 let count = findings.len();
-                print_value(format, &serde_json::json!({ "findings": findings, "count": count }));
+                print_value(
+                    format,
+                    &serde_json::json!({ "findings": findings, "count": count }),
+                );
             }
             Ok(EXIT_SUCCESS)
         }
         Command::RpcHealth { endpoint } => {
             let endpoint = devkit_rpc::Endpoint::parse(&endpoint).map_err(runtime)?;
-            let transport = devkit_rpc::HttpTransport::with_default_timeout(endpoint).map_err(runtime)?;
-            let health = devkit_rpc::Client::new(transport).health().map_err(runtime)?;
+            let transport =
+                devkit_rpc::HttpTransport::with_default_timeout(endpoint).map_err(runtime)?;
+            let health = devkit_rpc::Client::new(transport)
+                .health()
+                .map_err(runtime)?;
             let value = serde_json::to_value(health)
                 .map_err(|error| CliError::new(EXIT_ERROR, "internal", error.to_string()))?;
             print_value(format, &value);
@@ -264,11 +270,30 @@ fn doctor(format: OutputFormat) {
 }
 
 fn read_wasm(path: &str) -> Result<Vec<u8>, CliError> {
-    let metadata = fs::metadata(path).map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to inspect WASM file: {error}")))?;
+    let metadata = fs::metadata(path).map_err(|error| {
+        CliError::new(
+            EXIT_ERROR,
+            "io",
+            format!("failed to inspect WASM file: {error}"),
+        )
+    })?;
     if metadata.len() > devkit_contract::MAX_WASM_BYTES as u64 {
-        return Err(CliError::new(EXIT_ERROR, "invalid_input", format!("WASM exceeds the {}-byte limit", devkit_contract::MAX_WASM_BYTES)));
+        return Err(CliError::new(
+            EXIT_ERROR,
+            "invalid_input",
+            format!(
+                "WASM exceeds the {}-byte limit",
+                devkit_contract::MAX_WASM_BYTES
+            ),
+        ));
     }
-    let bytes = fs::read(path).map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to read WASM file: {error}")))?;
+    let bytes = fs::read(path).map_err(|error| {
+        CliError::new(
+            EXIT_ERROR,
+            "io",
+            format!("failed to read WASM file: {error}"),
+        )
+    })?;
     if bytes.len() > devkit_contract::MAX_WASM_BYTES {
         return Err(CliError::new(EXIT_ERROR, "invalid_input", format!("WASM exceeds the {}-byte limit", devkit_contract::MAX_WASM_BYTES)));
     }
