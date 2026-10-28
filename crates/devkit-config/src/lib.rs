@@ -14,13 +14,18 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self { rpc_url: None, timeout_ms: 10_000, verbose: false }
+        Self {
+            rpc_url: None,
+            timeout_ms: 10_000,
+            verbose: false,
+        }
     }
 }
 
 impl Config {
     pub fn parse_toml(input: &str) -> Result<Self, String> {
-        let config: Self = toml::from_str(input).map_err(|error| format!("invalid config: {error}"))?;
+        let config: Self =
+            toml::from_str(input).map_err(|error| format!("invalid config: {error}"))?;
         config.validate()?;
         Ok(config)
     }
@@ -42,7 +47,9 @@ impl Config {
             self.rpc_url = Some(value);
         }
         if let Ok(value) = std::env::var("STELLAR_FOUNDRY_TIMEOUT_MS") {
-            self.timeout_ms = value.parse().map_err(|_| "STELLAR_FOUNDRY_TIMEOUT_MS must be an integer".to_string())?;
+            self.timeout_ms = value
+                .parse()
+                .map_err(|_| "STELLAR_FOUNDRY_TIMEOUT_MS must be an integer".to_string())?;
         }
         if let Ok(value) = std::env::var("STELLAR_FOUNDRY_VERBOSE") {
             self.verbose = match value.to_ascii_lowercase().as_str() {
