@@ -204,5 +204,4 @@ mod tests {
         let error = inspect_wasm(&wasm).unwrap_err().to_string();
         assert!(error.contains("contractspecv0 XDR entry"), "{error}");
     }
-
 }
