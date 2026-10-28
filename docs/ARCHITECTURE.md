@@ -67,9 +67,12 @@ Design rules:
 - Failures are structured, never panics. Malformed input is a first-class test
   case; `fixtures/malformed/` and `crates/devkit-xdr/tests/malformed_corpus.rs`
   cover the regression corpus.
-- JSON is produced by `stellar-xdr`'s `serde` representation today. A curated,
-  versioned schema is future work; until then the JSON shape is documented as
-  **unstable**.
+- JSON is emitted as a versioned document: `schema_version`, `kind`, `value`,
+  and an opt-in `raw_xdr`. The envelope and the frozen XDR-JSON payload rules
+  are specified in [`XDR.md`](XDR.md), with SCVal details in
+  [`SCVAL.md`](SCVAL.md). Additive changes bump the schema minor version;
+  breaking changes require a major bump and a migration note.
+- Golden snapshots in `crates/devkit-xdr/tests/snapshots/` pin the schema.
 
 ## RPC architecture
 

@@ -1,0 +1,7 @@
+{
+  "kind": "scval",
+  "schema_version": "1.0",
+  "value": {
+    "u32": 42
+  }
+}
