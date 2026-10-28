@@ -296,7 +296,7 @@ fn doctor(format: OutputFormat) {
 /// independent of RPC-specific environment variables.
 fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
     const MAX_CONFIG_BYTES: u64 = 1024 * 1024;
-    let mut config = if let Some(path) = path {
+    let config = if let Some(path) = path {
         let metadata = fs::metadata(path).map_err(|error| {
             CliError::new(
                 EXIT_ERROR,
