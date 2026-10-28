@@ -60,8 +60,9 @@ stellar-foundry rpc-health https://soroban-testnet.stellar.org
   receive an endpoint after precedence is resolved.
 - Diagnostics emit event names only; do not add URLs, headers, or payloads to
   diagnostic output.
-- Endpoint policy rejects embedded credentials and permits plaintext HTTP only
-  for loopback hosts.
+- Endpoint policy rejects embedded credentials, permits plaintext HTTP only for
+  loopback hosts, and refuses private/link-local targets and cross-host
+  redirects. See [NETWORK_SECURITY.md](NETWORK_SECURITY.md).
 
 ## Not implemented yet
 

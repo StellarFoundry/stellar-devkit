@@ -75,11 +75,12 @@ Design rules:
 
 `devkit-rpc` separates protocol from transport:
 
-- `Endpoint` validates schemes, rejects embedded credentials, and permits
-  plaintext HTTP only for loopback hosts.
+- `Endpoint` validates schemes, rejects embedded credentials, permits plaintext
+  HTTP only for loopback hosts, and refuses non-public address literals.
 - `Transport` is the injection point. `MockTransport` is deterministic and used
   by tests; `HttpTransport` performs bounded JSON-RPC over reqwest with a finite
-  timeout and redirects disabled.
+  timeout, guarded DNS resolution, same-host-only redirects, and final-URL
+  re-validation. See [NETWORK_SECURITY.md](NETWORK_SECURITY.md).
 - Typed models cover `getHealth`, `getNetwork`, and `getLatestLedger`. Other RPC
   methods return raw JSON until they are modeled.
 - `RetryPolicy` retries transport failures and rate-limit responses. It does not
@@ -142,8 +143,9 @@ Commands: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`,
 
 - **No network access by default.** The only networked command is `rpc-health`,
   which requires an explicit endpoint (argument, environment, or config).
-- The HTTP transport uses a finite timeout, disables redirects, caps response
-  bytes before parsing, and validates JSON-RPC responses.
+- The HTTP transport uses a finite timeout, refuses private/link-local targets,
+  follows only re-validated same-host redirects, caps response bytes before
+  parsing, and validates JSON-RPC responses.
 - Scanned/decoded input is **untrusted**: decoding is bounded and fuzz targets
   exist for `ScVal`, `TransactionEnvelope`, and `ContractEvent`.
 - No secrets are read, logged, or committed. `.gitignore` excludes `.env*`,

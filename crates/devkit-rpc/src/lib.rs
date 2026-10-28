@@ -10,19 +10,28 @@
 //! * Endpoints are validated before use; plaintext `http` is only allowed for
 //!   loopback hosts, credentials in URLs are rejected, and unknown schemes are
 //!   refused.
+//! * Remote endpoints may not use private, link-local, unspecified, multicast,
+//!   or loopback address literals. DNS answers are filtered through the same
+//!   policy before a connection is made, so a public name cannot resolve to an
+//!   internal address.
+//! * Redirects are followed only to the original endpoint host, and every hop
+//!   is re-validated. All other redirects fail closed.
 //! * Responses are parsed with structured errors; malformed responses never
 //!   panic.
 
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::io::Read;
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, ToSocketAddrs};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use devkit_core::DevkitError;
+use reqwest::dns::{Addrs, Name, Resolve, Resolving};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use url::Url;
+use url::{Host, Url};
 
 const MAX_RPC_RESPONSE_BYTES: usize = 4 * 1024 * 1024;
 const MAX_RPC_RESPONSE_DEPTH: usize = 64;
@@ -48,36 +57,14 @@ impl Endpoint {
     ///   `::1`), to avoid sending traffic in plaintext to a remote host.
     /// * Any other scheme is rejected.
     /// * Embedded credentials are rejected.
+    /// * A remote endpoint may not be an IP literal in a private, link-local,
+    ///   unspecified, multicast, or loopback range. Loopback literals are only
+    ///   allowed because they are the local-endpoint case.
     pub fn parse(input: &str) -> Result<Self, DevkitError> {
         let url = Url::parse(input.trim())
             .map_err(|e| DevkitError::invalid(format!("invalid endpoint URL: {e}")))?;
 
-        match url.scheme() {
-            "https" => {}
-            "http" => {
-                if !is_loopback(&url) {
-                    return Err(DevkitError::invalid(
-                        "plaintext http is only allowed for loopback hosts; use https",
-                    ));
-                }
-            }
-            other => {
-                return Err(DevkitError::invalid(format!(
-                    "unsupported endpoint scheme: {other}"
-                )))
-            }
-        }
-
-        if !url.username().is_empty() || url.password().is_some() {
-            return Err(DevkitError::invalid(
-                "credentials embedded in the endpoint URL are not allowed",
-            ));
-        }
-
-        if url.host_str().is_none() {
-            return Err(DevkitError::invalid("endpoint URL has no host"));
-        }
-
+        validate_endpoint_url(&url)?;
         Ok(Endpoint { url })
     }
 
@@ -92,15 +79,196 @@ impl Endpoint {
     }
 }
 
-fn is_loopback(url: &Url) -> bool {
-    match url.host_str() {
-        Some("localhost") | Some("127.0.0.1") | Some("::1") | Some("[::1]") => true,
-        Some(host) => host
-            .parse::<std::net::IpAddr>()
-            .map(|ip| ip.is_loopback())
-            .unwrap_or(false),
-        None => false,
+fn validate_endpoint_url(url: &Url) -> Result<(), DevkitError> {
+    match url.scheme() {
+        "https" => {}
+        "http" => {
+            if !is_loopback(url) {
+                return Err(DevkitError::invalid(
+                    "plaintext http is only allowed for loopback hosts; use https",
+                ));
+            }
+        }
+        other => {
+            return Err(DevkitError::invalid(format!(
+                "unsupported endpoint scheme: {other}"
+            )))
+        }
     }
+
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err(DevkitError::invalid(
+            "credentials embedded in the endpoint URL are not allowed",
+        ));
+    }
+
+    let host = url
+        .host()
+        .ok_or_else(|| DevkitError::invalid("endpoint URL has no host"))?;
+    if host_is_loopback(&host) {
+        return Ok(());
+    }
+    let blocked = match host {
+        Host::Ipv4(ip) => is_blocked_ip(IpAddr::V4(ip)),
+        Host::Ipv6(ip) => is_blocked_ip(IpAddr::V6(ip)),
+        Host::Domain(_) => false,
+    };
+    if blocked {
+        return Err(DevkitError::invalid(format!(
+            "endpoint host `{}` is a private, link-local, or otherwise non-public address",
+            url.host_str().unwrap_or("<unknown>")
+        )));
+    }
+    Ok(())
+}
+
+fn is_loopback(url: &Url) -> bool {
+    url.host().is_some_and(|host| host_is_loopback(&host))
+}
+
+fn host_is_loopback(host: &Host<&str>) -> bool {
+    match host {
+        Host::Domain(domain) => {
+            domain.eq_ignore_ascii_case("localhost")
+                || domain
+                    .to_ascii_lowercase()
+                    .strip_suffix(".localhost")
+                    .is_some()
+        }
+        Host::Ipv4(ip) => ip.is_loopback(),
+        Host::Ipv6(ip) => ip_is_loopback(IpAddr::V6(*ip)),
+    }
+}
+
+fn ip_is_loopback(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(ip) => ip.is_loopback(),
+        IpAddr::V6(ip) => {
+            ip.is_loopback() || ip.to_ipv4_mapped().is_some_and(|ip| ip.is_loopback())
+        }
+    }
+}
+
+fn is_blocked_ip(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(ip) => is_blocked_ipv4(ip),
+        IpAddr::V6(ip) => is_blocked_ipv6(ip),
+    }
+}
+
+fn is_blocked_ipv4(ip: Ipv4Addr) -> bool {
+    let octets = ip.octets();
+    ip.is_private()
+        || ip.is_link_local()
+        || ip.is_unspecified()
+        || ip.is_broadcast()
+        || ip.is_multicast()
+        || octets[0] == 0
+        || (octets[0] == 100 && (64..=127).contains(&octets[1]))
+        || (octets[0] == 198 && matches!(octets[1], 18 | 19))
+}
+
+fn is_blocked_ipv6(ip: Ipv6Addr) -> bool {
+    if let Some(ip) = ip.to_ipv4_mapped() {
+        return is_blocked_ipv4(ip);
+    }
+    let segments = ip.segments();
+    ip.is_unspecified()
+        || ip.is_multicast()
+        || (segments[0] & 0xfe00) == 0xfc00
+        || (segments[0] & 0xffc0) == 0xfe80
+}
+
+fn resolved_ip_is_allowed(ip: IpAddr, allow_loopback: bool) -> bool {
+    if ip_is_loopback(ip) {
+        allow_loopback
+    } else {
+        !is_blocked_ip(ip)
+    }
+}
+
+/// Resolves endpoint hostnames with the same address policy as URL validation.
+///
+/// The guard runs before reqwest connects, so a public hostname that resolves
+/// to an internal address is refused instead of being used for SSRF.
+#[derive(Clone, Copy)]
+struct SsrfGuardResolver {
+    allow_loopback: bool,
+}
+
+impl Resolve for SsrfGuardResolver {
+    fn resolve(&self, name: Name) -> Resolving {
+        let host = name.as_str().to_owned();
+        let result = resolve_guarded(&host, self.allow_loopback);
+        Box::pin(std::future::ready(result))
+    }
+}
+
+fn resolve_guarded(
+    host: &str,
+    allow_loopback: bool,
+) -> Result<Addrs, Box<dyn std::error::Error + Send + Sync>> {
+    let addresses = (host, 0u16).to_socket_addrs().map_err(|error| {
+        std::io::Error::other(format!(
+            "failed to resolve RPC endpoint host `{host}`: {error}"
+        ))
+    })?;
+    let mut allowed = Vec::new();
+    let mut refused = false;
+    for address in addresses {
+        if resolved_ip_is_allowed(address.ip(), allow_loopback) {
+            allowed.push(address);
+        } else {
+            refused = true;
+        }
+    }
+    if allowed.is_empty() {
+        let reason = if refused {
+            "only loopback, private, link-local, or otherwise non-public addresses"
+        } else {
+            "no addresses"
+        };
+        return Err(Box::new(std::io::Error::other(format!(
+            "refusing RPC endpoint `{host}`: resolved to {reason}"
+        ))));
+    }
+    Ok(Box::new(allowed.into_iter()) as Addrs)
+}
+
+fn redirect_policy(allowed_host: String) -> reqwest::redirect::Policy {
+    reqwest::redirect::Policy::custom(move |attempt| {
+        if attempt.previous().len() > 5 {
+            return attempt.error("too many redirects");
+        }
+        let next = attempt.url().clone();
+        if !next
+            .host_str()
+            .is_some_and(|host| host.eq_ignore_ascii_case(&allowed_host))
+        {
+            return attempt.error(format!(
+                "refusing redirect to non-allowlisted host `{}`",
+                next.host_str().unwrap_or("<unknown>")
+            ));
+        }
+        match validate_endpoint_url(&next) {
+            Ok(()) => attempt.follow(),
+            Err(error) => attempt.error(error.to_string()),
+        }
+    })
+}
+
+fn validate_final_url(url: &Url, allowed_host: &str) -> Result<(), DevkitError> {
+    if !url
+        .host_str()
+        .is_some_and(|host| host.eq_ignore_ascii_case(allowed_host))
+    {
+        return Err(DevkitError::Io(format!(
+            "RPC transport refused a response from unexpected host `{}`",
+            url.host_str().unwrap_or("<unknown>")
+        )));
+    }
+    validate_endpoint_url(url)
+        .map_err(|error| DevkitError::Io(format!("RPC transport refused final URL: {error}")))
 }
 
 /// A JSON-RPC transport. Implementations may perform I/O; the rest of the crate
@@ -165,10 +333,12 @@ impl Transport for MockTransport {
 ///
 /// Responses are capped before JSON parsing. Requests have a finite timeout,
 /// JSON-RPC identifiers are checked, and server error messages are returned as
-/// structured errors. Redirects are disabled by the HTTP client to avoid
-/// silently forwarding RPC requests to an unexpected host.
+/// structured errors. Redirects are followed only to the endpoint host and are
+/// re-validated at every hop; resolved addresses are filtered by the same
+/// endpoint policy, so DNS cannot redirect a request to an internal network.
 pub struct HttpTransport {
     endpoint: String,
+    allowed_host: String,
     client: reqwest::blocking::Client,
     next_id: AtomicU64,
 }
@@ -181,15 +351,24 @@ impl HttpTransport {
                 "RPC timeout must be greater than zero",
             ));
         }
+        let allowed_host = endpoint
+            .url
+            .host_str()
+            .ok_or_else(|| DevkitError::invalid("endpoint URL has no host"))?
+            .to_owned();
         let client = reqwest::blocking::Client::builder()
             .timeout(timeout)
-            .redirect(reqwest::redirect::Policy::none())
+            .redirect(redirect_policy(allowed_host.clone()))
+            .dns_resolver(Arc::new(SsrfGuardResolver {
+                allow_loopback: endpoint.is_loopback(),
+            }))
             .build()
             .map_err(|error| {
                 DevkitError::Io(format!("failed to build RPC HTTP client: {error}"))
             })?;
         Ok(Self {
             endpoint: endpoint.as_str().to_owned(),
+            allowed_host,
             client,
             next_id: AtomicU64::new(1),
         })
@@ -218,7 +397,16 @@ impl Transport for HttpTransport {
             .post(&self.endpoint)
             .json(&request)
             .send()
-            .map_err(|error| DevkitError::Io(format!("RPC HTTP request failed: {error}")))?;
+            .map_err(|error| {
+                let mut message = format!("RPC HTTP request failed: {error}");
+                let mut source = std::error::Error::source(&error);
+                while let Some(cause) = source {
+                    message.push_str(&format!(": {cause}"));
+                    source = cause.source();
+                }
+                DevkitError::Io(message)
+            })?;
+        validate_final_url(response.url(), &self.allowed_host)?;
         let status = response.status();
         if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
             let retry_after = response
@@ -593,6 +781,52 @@ mod tests {
     }
 
     #[test]
+    fn rejects_private_and_link_local_ip_literals() {
+        for input in [
+            "https://10.0.0.1",
+            "https://172.16.0.1",
+            "https://192.168.1.1",
+            "https://169.254.169.254",
+            "https://100.64.0.1",
+            "https://[fd00::1]",
+            "https://[fe80::1]",
+            "https://[::ffff:192.168.1.1]",
+        ] {
+            assert!(
+                Endpoint::parse(input).is_err(),
+                "{input} should be refused by the endpoint policy"
+            );
+        }
+    }
+
+    #[test]
+    fn allows_loopback_literals_for_local_nodes() {
+        assert!(Endpoint::parse("https://127.0.0.1").is_ok());
+        assert!(Endpoint::parse("https://[::1]").is_ok());
+        assert!(Endpoint::parse("http://localhost:8000").is_ok());
+        assert!(Endpoint::parse("http://api.localhost:8000").is_ok());
+        assert!(Endpoint::parse("https://[::ffff:127.0.0.1]").is_ok());
+    }
+
+    #[test]
+    fn resolved_addresses_follow_the_endpoint_policy() {
+        assert!(resolved_ip_is_allowed("127.0.0.1".parse().unwrap(), true));
+        assert!(!resolved_ip_is_allowed("127.0.0.1".parse().unwrap(), false));
+        assert!(!resolved_ip_is_allowed(
+            "192.168.0.1".parse().unwrap(),
+            true
+        ));
+        assert!(!resolved_ip_is_allowed(
+            "169.254.169.254".parse().unwrap(),
+            true
+        ));
+        assert!(!resolved_ip_is_allowed("fe80::1".parse().unwrap(), true));
+        assert!(resolved_ip_is_allowed("1.1.1.1".parse().unwrap(), false));
+        assert!(resolve_guarded("localhost", true).is_ok());
+        assert!(resolve_guarded("localhost", false).is_err());
+    }
+
+    #[test]
     fn parses_health_response() {
         let transport = MockTransport::with_responses(vec![json!({
             "status": "healthy",
@@ -739,6 +973,74 @@ mod tests {
                     ..
                 } if *retry_after == Duration::from_secs(7)
             ),
+            "unexpected error: {error}"
+        );
+        server.join().expect("test server exits");
+    }
+
+    #[test]
+    fn http_transport_follows_same_host_redirects_and_revalidates_them() {
+        use std::io::Write;
+        use std::net::TcpListener;
+
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
+        let address = listener.local_addr().expect("test server address");
+        let server = std::thread::spawn(move || {
+            for _ in 0..2 {
+                let (mut stream, _) = listener.accept().expect("accept request");
+                let mut request = [0u8; 1024];
+                let _ = stream.read(&mut request);
+                if request.starts_with(b"POST /final") {
+                    let body = r#"{"jsonrpc":"2.0","id":1,"result":{"status":"healthy"}}"#;
+                    let response = format!(
+                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                        body.len()
+                    );
+                    stream
+                        .write_all(response.as_bytes())
+                        .expect("write response");
+                } else {
+                    stream
+                        .write_all(
+                            b"HTTP/1.1 307 Temporary Redirect\r\nLocation: /final\r\nConnection: close\r\nContent-Length: 0\r\n\r\n",
+                        )
+                        .expect("write redirect");
+                }
+            }
+        });
+
+        let endpoint = Endpoint::parse(&format!("http://{address}")).expect("loopback endpoint");
+        let transport = HttpTransport::with_default_timeout(endpoint).expect("transport");
+        let health = transport
+            .call("getHealth", json!({}))
+            .expect("same-host redirect should be followed");
+        assert_eq!(health["status"], "healthy");
+        server.join().expect("test server exits");
+    }
+
+    #[test]
+    fn http_transport_refuses_cross_host_redirects() {
+        use std::io::Write;
+        use std::net::TcpListener;
+
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
+        let address = listener.local_addr().expect("test server address");
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept request");
+            let mut request = [0u8; 1024];
+            let _ = stream.read(&mut request);
+            stream
+                .write_all(
+                    b"HTTP/1.1 302 Found\r\nLocation: http://example.com/rpc\r\nConnection: close\r\nContent-Length: 0\r\n\r\n",
+                )
+                .expect("write redirect");
+        });
+
+        let endpoint = Endpoint::parse(&format!("http://{address}")).expect("loopback endpoint");
+        let transport = HttpTransport::with_default_timeout(endpoint).expect("transport");
+        let error = transport.call("getHealth", json!({})).unwrap_err();
+        assert!(
+            error.to_string().contains("non-allowlisted"),
             "unexpected error: {error}"
         );
         server.join().expect("test server exits");

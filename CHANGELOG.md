@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default), and return a clear `DevkitError::RateLimited` when the cap would be
   exceeded.
 
+### Security
+
+- `devkit-rpc`: harden the HTTP transport against SSRF. Endpoint validation now
+  refuses private, link-local, and other non-public address literals, DNS
+  answers are filtered before connection, and only re-validated same-host
+  redirects are followed. The final URL is checked again before reading the
+  response. See `docs/NETWORK_SECURITY.md`.
+
 ## [Unreleased]
 
 ### Added
