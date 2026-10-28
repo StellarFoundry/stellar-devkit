@@ -49,10 +49,6 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = FormatArg::Terminal, global = true)]
     format: FormatArg,
 
-    /// Include the raw base64 XDR input in decoded JSON output.
-    #[arg(long, global = true)]
-    raw: bool,
-
     #[command(subcommand)]
     command: Command,
 }
@@ -177,9 +173,6 @@ fn print_json_error(category: &str, message: &str) {
 
 fn run(cli: Cli) -> Result<u8, CliError> {
     let format: OutputFormat = cli.format.into();
-    let options = xdr::DecodeOptions {
-        include_raw: cli.raw,
-    };
     let config_path = cli.config.clone();
     match cli.command {
         Command::Version => {
@@ -199,23 +192,20 @@ fn run(cli: Cli) -> Result<u8, CliError> {
         }
         Command::Scval { value } => {
             let value = read_value(value)?;
-            let decoded =
-                xdr::inspect_scval_base64_with_options(&value, options).map_err(runtime)?;
-            print_value(format, &decoded);
+            let decoded = xdr::inspect_scval_base64(&value).map_err(runtime)?;
+            print_value(format, &xdr::summary("scval", &decoded));
             Ok(EXIT_SUCCESS)
         }
         Command::Envelope { value } => {
             let value = read_value(value)?;
-            let decoded =
-                xdr::inspect_envelope_base64_with_options(&value, options).map_err(runtime)?;
-            print_value(format, &decoded);
+            let decoded = xdr::inspect_envelope_base64(&value).map_err(runtime)?;
+            print_value(format, &xdr::summary("transaction_envelope", &decoded));
             Ok(EXIT_SUCCESS)
         }
         Command::Event { value } => {
             let value = read_value(value)?;
-            let decoded =
-                xdr::inspect_event_base64_with_options(&value, options).map_err(runtime)?;
-            print_value(format, &decoded);
+            let decoded = xdr::inspect_event_base64(&value).map_err(runtime)?;
+            print_value(format, &xdr::summary("contract_event", &decoded));
             Ok(EXIT_SUCCESS)
         }
         Command::InspectWasm { path } => {

@@ -10,24 +10,8 @@
 
 use devkit_core::DevkitError;
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 use stellar_xdr::{ContractEvent, Limits, ReadXdr, ScVal, TransactionEnvelope};
-
-/// Version of the decoded-XDR JSON schema emitted by this crate.
-///
-/// The schema covers the document envelope (`schema_version`, `kind`, `value`,
-/// and optional `raw_xdr`). See `docs/XDR.md` and `docs/SCVAL.md`.
-pub const XDR_JSON_SCHEMA_VERSION: &str = "1.0";
-
-/// Options controlling decoded-XDR output.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct DecodeOptions {
-    /// Include the canonical base64 XDR input as `raw_xdr`.
-    ///
-    /// Off by default so machine-readable output stays compact; the raw
-    /// encoding is always available behind this flag.
-    pub include_raw: bool,
-}
 
 /// Maximum recursion depth applied when decoding untrusted XDR.
 ///
@@ -62,81 +46,24 @@ pub struct StrkeyInfo {
     pub value: String,
 }
 
-/// Build a versioned decoded-XDR document.
-///
-/// The envelope is the stable part of the schema:
-///
-/// ```json
-/// {
-///   "schema_version": "1.0",
-///   "kind": "scval",
-///   "value": { "...": "XDR-JSON payload" },
-///   "raw_xdr": "AAAAAwAAACo="
-/// }
-/// ```
-///
-/// `raw_xdr` is only present when [`DecodeOptions::include_raw`] is set.
-fn document(kind: &str, value: Value, input: &str, options: DecodeOptions) -> Value {
-    let mut object = serde_json::Map::new();
-    object.insert(
-        "schema_version".to_string(),
-        Value::String(XDR_JSON_SCHEMA_VERSION.to_string()),
-    );
-    object.insert("kind".to_string(), Value::String(kind.to_string()));
-    object.insert("value".to_string(), value);
-    if options.include_raw {
-        object.insert("raw_xdr".to_string(), Value::String(input.to_string()));
-    }
-    Value::Object(object)
-}
-
-/// Decodes a base64 `ScVal` and returns a versioned JSON document.
+/// Decodes a base64 `ScVal` and returns developer-friendly JSON.
 pub fn inspect_scval_base64(input: &str) -> Result<Value, DevkitError> {
-    inspect_scval_base64_with_options(input, DecodeOptions::default())
+    let value = ScVal::from_xdr_base64(input.trim(), limits()).map_err(DevkitError::decode)?;
+    serde_json::to_value(&value).map_err(DevkitError::decode)
 }
 
-/// Decodes a base64 `ScVal` with explicit output options.
-pub fn inspect_scval_base64_with_options(
-    input: &str,
-    options: DecodeOptions,
-) -> Result<Value, DevkitError> {
-    let input = input.trim();
-    let value = ScVal::from_xdr_base64(input, limits()).map_err(DevkitError::decode)?;
-    let value = serde_json::to_value(&value).map_err(DevkitError::decode)?;
-    Ok(document("scval", value, input, options))
-}
-
-/// Decodes a base64 `TransactionEnvelope` and returns a versioned JSON document.
+/// Decodes a base64 `TransactionEnvelope` and returns developer-friendly JSON.
 pub fn inspect_envelope_base64(input: &str) -> Result<Value, DevkitError> {
-    inspect_envelope_base64_with_options(input, DecodeOptions::default())
+    let value = TransactionEnvelope::from_xdr_base64(input.trim(), limits())
+        .map_err(DevkitError::decode)?;
+    serde_json::to_value(&value).map_err(DevkitError::decode)
 }
 
-/// Decodes a base64 `TransactionEnvelope` with explicit output options.
-pub fn inspect_envelope_base64_with_options(
-    input: &str,
-    options: DecodeOptions,
-) -> Result<Value, DevkitError> {
-    let input = input.trim();
-    let value =
-        TransactionEnvelope::from_xdr_base64(input, limits()).map_err(DevkitError::decode)?;
-    let value = serde_json::to_value(&value).map_err(DevkitError::decode)?;
-    Ok(document("transaction_envelope", value, input, options))
-}
-
-/// Decodes a base64 `ContractEvent` and returns a versioned JSON document.
+/// Decodes a base64 `ContractEvent` and returns developer-friendly JSON.
 pub fn inspect_event_base64(input: &str) -> Result<Value, DevkitError> {
-    inspect_event_base64_with_options(input, DecodeOptions::default())
-}
-
-/// Decodes a base64 `ContractEvent` with explicit output options.
-pub fn inspect_event_base64_with_options(
-    input: &str,
-    options: DecodeOptions,
-) -> Result<Value, DevkitError> {
-    let input = input.trim();
-    let value = ContractEvent::from_xdr_base64(input, limits()).map_err(DevkitError::decode)?;
-    let value = serde_json::to_value(&value).map_err(DevkitError::decode)?;
-    Ok(document("contract_event", value, input, options))
+    let value =
+        ContractEvent::from_xdr_base64(input.trim(), limits()).map_err(DevkitError::decode)?;
+    serde_json::to_value(&value).map_err(DevkitError::decode)
 }
 
 /// Classifies a Stellar strkey.
@@ -158,12 +85,9 @@ pub fn describe_strkey(input: &str) -> Result<StrkeyInfo, DevkitError> {
     })
 }
 
-/// Builds a versioned document for an already-decoded value.
-///
-/// Prefer the `inspect_*` functions, which decode under bounded limits. This
-/// helper remains for callers that already hold a decoded value.
+/// Builds a compact summary object for a decoded value, used by the CLI.
 pub fn summary(kind: &str, value: &Value) -> Value {
-    document(kind, value.clone(), "", DecodeOptions::default())
+    json!({ "kind": kind, "value": value })
 }
 
 #[cfg(test)]
@@ -179,36 +103,8 @@ mod tests {
     fn decodes_scval_u32_roundtrip() {
         let encoded = roundtrip_scval(&ScVal::U32(42));
         let decoded = inspect_scval_base64(&encoded).unwrap();
-        assert_eq!(decoded["schema_version"], XDR_JSON_SCHEMA_VERSION);
-        assert_eq!(decoded["kind"], "scval");
-        assert!(decoded.get("value").is_some(), "missing value: {decoded}");
         let text = serde_json::to_string(&decoded).unwrap();
         assert!(text.contains("42"), "unexpected json: {text}");
-    }
-
-    #[test]
-    fn raw_xdr_is_opt_in_and_preserved_verbatim() {
-        let encoded = roundtrip_scval(&ScVal::U32(7));
-        let default = inspect_scval_base64(&encoded).unwrap();
-        assert!(default.get("raw_xdr").is_none());
-
-        let with_raw = inspect_scval_base64_with_options(
-            &format!("  {encoded}\n"),
-            DecodeOptions { include_raw: true },
-        )
-        .unwrap();
-        assert_eq!(with_raw["raw_xdr"], encoded);
-        assert_eq!(with_raw["schema_version"], XDR_JSON_SCHEMA_VERSION);
-    }
-
-    #[test]
-    fn summary_uses_the_versioned_envelope() {
-        let value = serde_json::json!({ "u32": 1 });
-        let summary = summary("scval", &value);
-        assert_eq!(summary["schema_version"], XDR_JSON_SCHEMA_VERSION);
-        assert_eq!(summary["kind"], "scval");
-        assert_eq!(summary["value"], value);
-        assert!(summary.get("raw_xdr").is_none());
     }
 
     #[test]

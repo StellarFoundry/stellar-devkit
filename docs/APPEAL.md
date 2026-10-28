@@ -78,6 +78,16 @@ it first. Example:
 | Scope is distinct | `docs/WHY_DEVKIT.md` |
 | Repository gate | `cargo fmt --all -- --check`; `cargo clippy --locked --workspace --all-targets --all-features -- -D warnings`; `cargo test --locked --workspace --all-features` |
 
+## Contribution integrity
+
+Do **not** present commits from accounts controlled by the maintainer as
+independent external contributions. That includes the maintainer's own alternate
+accounts. Reviewers can correlate account ownership, email domains, and activity
+patterns, and sockpuppeting is a terms violation.
+
+Use only genuinely independent contributors as external-contribution evidence.
+If there are none yet, say so and describe the outreach plan instead.
+
 ## Do not claim
 
 - That the project is approved, funded, or guaranteed points.
