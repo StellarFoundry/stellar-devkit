@@ -17,14 +17,14 @@
 - `devkit-contract`: bounded, non-executing WASM validation and import/export/custom-section metadata.
 - `devkit-analysis`: deterministic structural findings with stable rule IDs and SARIF 2.1.0 serialization.
 - `devkit-config`: strict TOML parsing, timeout validation, environment overrides, and static diagnostics.
-- CI: formatting, Clippy, and tests on Linux, Windows, and macOS; PR #127 also adds a RustSec dependency audit and declares Rust 1.91 as the workspace MSRV.
+- CI: formatting, Clippy, and tests on Linux, Windows, and macOS; Rust 1.91 MSRV job, scheduled fuzz smoke tests, and RustSec dependency audit.
 - Release preparation: release-validation workflow, release checklist, implementation-capabilities documentation, and updated Drips readiness checklist.
 
 ## Verified CI status
 
-- PR #133 head `039e055a0fc3f2118eb891fd572025cfb2f10e90`: its recorded CI run passed formatting, Clippy, and Linux, Windows, and macOS tests.
-- PR #127 head `140e3a547db4665c8195e83a070ea1c1c639e63e`: its recorded CI jobs and RustSec audit passed.
-- These are separate branch runs. They do **not** establish that the combined changes pass after branch reconciliation.
+- The pre-integration PR #133 head passed formatting, Clippy, and Linux, Windows, and macOS tests.
+- The pre-integration PR #127 head passed its recorded CI jobs and RustSec audit.
+- The combined merge commit must pass a fresh CI run before the integration is considered validated.
 
 ## Remaining limitations and integration work
 
@@ -32,7 +32,6 @@
 - Security-analysis rules are structural heuristics, not a comprehensive vulnerability engine.
 - SARIF serialization is implemented; automatic GitHub code-scanning upload is not configured.
 - The configuration library exists, but it is not yet fully wired into every CLI command. `rpc-health` takes an explicit endpoint argument.
-- The two open PR branches diverge from the current base; combined integration and CI remain required before treating the work as ready for a Drips Wave appeal.
 - Do not describe unmerged work as already released or available from `main`.
 
 ## Security status

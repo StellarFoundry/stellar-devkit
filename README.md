@@ -63,6 +63,7 @@ Exit codes: `0` success, `2` usage error, `3` runtime/decode error.
 - [Project status](docs/PROJECT_STATUS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Contributing through Drips Wave](docs/WAVE.md)
+- [Drips readiness checklist](docs/DRIPS_READINESS.md)
 
 ## Contributing
 
