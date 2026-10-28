@@ -193,4 +193,17 @@ mod tests {
         assert!(report.exports.is_empty());
         assert!(!report.has_contract_spec);
     }
+    #[test]
+    fn rejects_malformed_contract_spec_xdr() {
+        let name = b"contractspecv0";
+        let payload_len = 1 + name.len() + 1;
+        let mut wasm = b"\\0asm\\x01\\0\\0\\0".to_vec();
+        wasm.extend_from_slice(&[0, payload_len as u8, name.len() as u8]);
+        wasm.extend_from_slice(name);
+        wasm.push(0xff);
+
+        let error = inspect_wasm(&wasm).unwrap_err().to_string();
+        assert!(error.contains("contractspecv0 XDR entry"), "{error}");
+    }
+
 }
