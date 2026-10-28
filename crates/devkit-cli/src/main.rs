@@ -214,7 +214,8 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             if cli.format == FormatArg::Sarif {
                 println!("{}", devkit_analysis::to_sarif(&findings, Some(&path)));
             } else {
-                print_value(format, &serde_json::json!({ "findings": findings, "count": findings.len() }));
+                let count = findings.len();
+                print_value(format, &serde_json::json!({ "findings": findings, "count": count }));
             }
             Ok(EXIT_SUCCESS)
         }
