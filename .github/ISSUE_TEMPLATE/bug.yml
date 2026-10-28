@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible bug in the CLI or libraries
+title: "[Bug]: "
+labels: ["type/bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities here. Use
+        https://github.com/StellarFoundry/stellar-devkit/security/advisories/new
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `stellar-foundry version`, or the commit SHA.
+      placeholder: "stellar-foundry 0.1.0 / aec759c"
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command or crate
+      options:
+        - doctor
+        - strkey
+        - scval
+        - envelope
+        - event
+        - endpoint
+        - inspect-wasm
+        - analyze-wasm
+        - rpc-health
+        - library API
+        - build / CI
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the exact command and, for XDR, a minimal input.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the exit code and whether `--format json` changes the output.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Rust version, and whether the input came from a file, stdin, or a live RPC endpoint.
+    validations:
+      required: true
