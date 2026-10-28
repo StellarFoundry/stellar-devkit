@@ -426,3 +426,39 @@ fn runtime(error: devkit_core::DevkitError) -> CliError {
     };
     CliError::new(EXIT_ERROR, category, error.to_string())
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loads_rpc_config_file() {
+        let path = std::env::temp_dir().join(format!(
+            "stellar-foundry-config-{}.toml",
+            std::process::id()
+        ));
+        fs::write(
+            &path,
+            "rpc_url = \"https://soroban-testnet.stellar.org\"\ntimeout_ms = 2500\nverbose = true\n",
+        )
+        .expect("write temporary config");
+        let config = load_config(path.to_str()).expect("valid config");
+        let _ = fs::remove_file(&path);
+        assert_eq!(config.rpc_url.as_deref(), Some("https://soroban-testnet.stellar.org"));
+        assert_eq!(config.timeout_ms, 2500);
+        assert!(config.verbose);
+    }
+
+    #[test]
+    fn rejects_unknown_config_keys() {
+        let path = std::env::temp_dir().join(format!(
+            "stellar-foundry-invalid-config-{}.toml",
+            std::process::id()
+        ));
+        fs::write(&path, "unexpected = true\n").expect("write temporary config");
+        let result = load_config(path.to_str());
+        let _ = fs::remove_file(&path);
+        assert!(result.is_err());
+    }
+}
