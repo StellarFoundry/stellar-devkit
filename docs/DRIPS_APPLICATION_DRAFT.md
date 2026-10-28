@@ -6,7 +6,7 @@ This is a factual draft for review before any application is submitted. It does 
 
 StellarFoundry DevKit is a Rust developer toolkit for Stellar and Soroban. Its current implementation provides bounded decoding of `ScVal`, `TransactionEnvelope`, and `ContractEvent` XDR; Stellar strkey classification; RPC endpoint validation; a typed RPC protocol layer with deterministic mock transport; and a CLI named `stellar-foundry`.
 
-The combined open implementation PR also adds bounded HTTP JSON-RPC transport, non-executing WASM structural inspection, deterministic structural findings, SARIF 2.1.0 serialization, strict TOML configuration APIs, and release/readiness workflows. These changes are still under review and should not be described as already merged or released.
+The implementation branch also adds bounded HTTP JSON-RPC transport, non-executing WASM inspection, bounded decoding of contractspecv0 XDR entries, deterministic structural findings, SARIF 2.1.0 serialization and a manual code-scanning upload workflow, strict TOML configuration wired into `rpc-health`, and release/readiness workflows. These changes are still under review until PR #133 merges.
 
 ## Problem and ecosystem relevance
 
@@ -25,10 +25,10 @@ The combined CI run passed formatting, Clippy, Linux, Windows, macOS, and Rust 1
 
 ## Current limitations
 
-- The `contractspecv0` custom section is detected and measured, but individual XDR entries are not yet decoded into typed function, struct, and enum metadata.
+- `contractspecv0` entries are decoded with the official Stellar XDR types into XDR-JSON definitions, variant names, and best-effort names; a normalized ABI schema remains future work.
 - Security-analysis rules are structural heuristics, not a comprehensive vulnerability detector.
-- SARIF serialization is implemented, but automatic GitHub code-scanning upload is not configured.
-- Configuration parsing and environment overrides exist as a library API, but are not yet wired into every CLI command.
+- SARIF can be uploaded using the manual workflow when a repository-relative WASM artifact exists and code-scanning permissions are available.
+- RPC configuration is wired into `rpc-health`; other commands do not consume RPC settings.
 - The implementation PRs remain open. Do not state that all proposed features are already available on `main`.
 
 ## Contributor opportunities
