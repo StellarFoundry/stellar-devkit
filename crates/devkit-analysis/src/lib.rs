@@ -7,7 +7,11 @@ use serde_json::{json, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
-pub enum Severity { Error, Warning, Note }
+pub enum Severity {
+    Error,
+    Warning,
+    Note,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Finding {
@@ -56,19 +60,27 @@ pub fn to_sarif(findings: &[Finding], artifact_uri: Option<&str>) -> Value {
         json!({"id":"DEVKIT-WASM-002","name":"NonStandardImport","shortDescription":{"text":"Import from a non-standard module"},"defaultConfiguration":{"level":"warning"}}),
         json!({"id":"DEVKIT-WASM-003","name":"LargeWasmArtifact","shortDescription":{"text":"Large WASM artifact"},"defaultConfiguration":{"level":"note"}}),
     ];
-    let results: Vec<Value> = findings.iter().map(|finding| {
-        let level = match finding.severity { Severity::Error => "error", Severity::Warning => "warning", Severity::Note => "note" };
-        let mut result = json!({
-            "ruleId": finding.rule_id,
-            "level": level,
-            "message": {"text": finding.message},
-            "properties": {"title": finding.title, "evidence": finding.evidence}
-        });
-        if let Some(uri) = artifact_uri {
-            result["locations"] = json!([{"physicalLocation":{"artifactLocation":{"uri":uri}}}]);
-        }
-        result
-    }).collect();
+    let results: Vec<Value> = findings
+        .iter()
+        .map(|finding| {
+            let level = match finding.severity {
+                Severity::Error => "error",
+                Severity::Warning => "warning",
+                Severity::Note => "note",
+            };
+            let mut result = json!({
+                "ruleId": finding.rule_id,
+                "level": level,
+                "message": {"text": finding.message},
+                "properties": {"title": finding.title, "evidence": finding.evidence}
+            });
+            if let Some(uri) = artifact_uri {
+                result["locations"] =
+                    json!([{"physicalLocation":{"artifactLocation":{"uri":uri}}}]);
+            }
+            result
+        })
+        .collect();
     json!({
         "$schema":"https://json.schemastore.org/sarif-2.1.0.json",
         "version":"2.1.0",
@@ -85,14 +97,19 @@ mod tests {
     fn emits_evidence_for_nonstandard_imports() {
         let report = ContractReport {
             wasm_bytes: 100,
-            imports: vec![ImportInfo { module: "host".into(), name: "call".into() }],
+            imports: vec![ImportInfo {
+                module: "host".into(),
+                name: "call".into(),
+            }],
             exports: vec![],
             custom_sections: vec![],
             has_contract_spec: false,
             contract_spec_bytes: 0,
         };
         let findings = analyze(&report);
-        assert!(findings.iter().any(|item| item.rule_id == "DEVKIT-WASM-002" && item.evidence == "host::call"));
+        assert!(findings
+            .iter()
+            .any(|item| item.rule_id == "DEVKIT-WASM-002" && item.evidence == "host::call"));
         let sarif = to_sarif(&findings, Some("contract.wasm"));
         assert_eq!(sarif["version"], "2.1.0");
         assert!(sarif["runs"][0]["results"].as_array().unwrap().len() >= 2);
