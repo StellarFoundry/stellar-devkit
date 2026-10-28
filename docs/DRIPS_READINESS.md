@@ -36,7 +36,7 @@ Merged capabilities:
   fixtures.
 - RPC endpoint policy validation and a typed RPC client with deterministic mock
   transport.
-- HTTP JSON-RPC transport with timeout, redirects disabled, a response-size cap,
+- HTTP JSON-RPC transport with timeout, SSRF-hardened same-host redirects, a response-size cap,
   response validation, and structured errors.
 - Non-executing WASM validation, structural metadata, and bounded decoding of
   `contractspecv0` XDR entries into entry kind/name/definition records.

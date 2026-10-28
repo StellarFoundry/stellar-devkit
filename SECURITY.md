@@ -44,7 +44,10 @@ Out of scope:
 
 ## Security model
 
-- No network access is performed by default. No network features exist yet.
+- No network access is performed by default. Network access is explicit, and
+  `HttpTransport` enforces a fail-closed SSRF policy: non-public addresses are
+  refused, DNS answers are filtered, and only same-host redirects are followed.
+  See [docs/NETWORK_SECURITY.md](docs/NETWORK_SECURITY.md).
 - Decoding is bounded; malformed input is handled with structured errors, not
   panics.
 - No secrets are read, logged, or committed.
