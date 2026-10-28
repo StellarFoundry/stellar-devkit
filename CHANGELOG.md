@@ -5,10 +5,11 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-10-28
 
-The workspace version is `0.1.0`. This section describes merged work on `main`;
-no tagged release or crates.io publication exists yet.
+First tagged release. Prebuilt binaries for Linux x86_64, macOS arm64, and
+Windows x86_64 are attached to the GitHub Release with SHA256 checksums.
+crates.io publication is still pending.
 
 ### Added
 
@@ -55,7 +56,8 @@ no tagged release or crates.io publication exists yet.
 
 ### Limitations
 
-- No tagged release, release binaries, or crates.io publication exists yet.
+- crates.io publication is still pending; install from the GitHub Release or
+  build from source.
 - `contractspecv0` XDR entries are decoded into official XDR-JSON definitions
   with a variant kind and best-effort name; a normalized ABI schema remains
   future work.

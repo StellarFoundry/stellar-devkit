@@ -146,7 +146,8 @@ Commands: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`,
 - Rule/CLI exit codes and machine output are treated as API and documented.
 - The toolkit tracks current Stellar protocol crates (28.x line at the time of
   writing).
-- The workspace version is `0.1.0`; no tagged release exists yet.
+- The workspace version is `0.1.0`; `v0.1.0` is tagged and released. crates.io
+  publication is still pending.
 
 ## Testing architecture
 

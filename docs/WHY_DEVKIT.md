@@ -80,7 +80,8 @@ belong to XDR/RPC/transaction inspection belong here.
   ABI.
 - Structural analysis is heuristic, not a vulnerability proof.
 - RPC configuration currently applies to `rpc-health`.
-- No tagged release or crates.io publication exists yet.
+- `v0.1.0` is released with Linux, macOS, and Windows binaries; crates.io
+  publication is still pending.
 
 If a workflow needs something not listed here, treat it as planned work only
 when an open issue says so.

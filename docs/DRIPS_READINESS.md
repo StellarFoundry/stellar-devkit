@@ -73,8 +73,8 @@ exact scope.
   WASM artifact in the repository plus code-scanning permissions.
 - RPC config is wired into `rpc-health`; other commands do not use RPC settings.
   Endpoint precedence is command line, then environment, then config file.
-- The workspace is `0.1.0`, but there is no tagged release, no release binaries,
-  and no crates.io publication.
+- `v0.1.0` is released with Linux, macOS, and Windows binaries and checksums;
+  crates.io publication is still pending.
 - The project has limited external adoption: no external contributors have merged
   PRs yet, and the repository is new. Do not present issue counts or labels as
   evidence of traction.

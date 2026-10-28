@@ -47,8 +47,11 @@ link to a merged PR, commit, CI run, release, or contributor.
 > 4. **The scope is distinct.** DevKit is an XDR/RPC/transaction/contract
 >    inspection workflow. It is not a source-level vulnerability scanner; the
 >    boundary with `soroban-security-scanner` is documented in `docs/WHY_DEVKIT.md`.
+> 5. **There is a release.** `v0.1.0` is published with Linux, macOS, and Windows
+>    binaries plus SHA256 checksums.
 >
 > Evidence:
+> - Release: https://github.com/StellarFoundry/stellar-devkit/releases/tag/v0.1.0
 > - Merge: `aec759c`
 > - CI: https://github.com/StellarFoundry/stellar-devkit/actions/runs/40690141880
 > - RustSec: https://github.com/StellarFoundry/stellar-devkit/actions/runs/40690141721
@@ -87,10 +90,10 @@ it first. Example:
 
 These are not required, but they strengthen an appeal:
 
-- Tag and publish `v0.1.0` with release binaries and checksums.
-- Publish the workspace crates to crates.io.
-- Get 3–5 external contributions or documented real-world usage.
-- Add a docs site or a recorded end-to-end demo with real testnet data.
+- [x] Tag and publish `v0.1.0` with release binaries and checksums.
+- [ ] Publish the workspace crates to crates.io.
+- [ ] Get 3–5 independent external contributions or documented real-world usage.
+- [ ] Add a docs site or a recorded end-to-end demo with real testnet data.
 
 ## After submitting
 

@@ -1,6 +1,6 @@
 # Project Status
 
-**Current phase:** Developer-tooling implementation merged on `main`; pre-release hardening
+**Current phase:** Developer-tooling implementation merged on `main`; post-`v0.1.0` hardening
 
 **Repository:** https://github.com/StellarFoundry/stellar-devkit
 
@@ -48,9 +48,13 @@ Rust 1.91.0 MSRV tests:
 
 ## Release status
 
-The workspace version is `0.1.0`. There is **no tagged release**, no GitHub
-Release with binaries, and no crates.io publication yet. The release-validation
-workflow and checklist exist, but publishing remains outstanding work.
+The workspace version is `0.1.0`, and `v0.1.0` is tagged and published with
+prebuilt Linux x86_64, macOS arm64, and Windows x86_64 binaries plus SHA256
+checksums:
+
+- https://github.com/StellarFoundry/stellar-devkit/releases/tag/v0.1.0
+
+crates.io publication remains outstanding.
 
 ## Remaining limitations
 
@@ -64,8 +68,8 @@ workflow and checklist exist, but publishing remains outstanding work.
 - RPC configuration is wired into `rpc-health`: command-line endpoint overrides
   environment, which overrides the TOML file. Other commands do not consume RPC
   configuration because they do not make network requests.
-- The project is pre-release. Do not describe the workspace version as a
-  published release.
+- crates.io publication is pending. Do not describe the workspace as published
+  on crates.io.
 
 ## Security status
 

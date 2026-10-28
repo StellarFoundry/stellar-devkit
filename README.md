@@ -9,10 +9,12 @@ and a CLI.
 
 The core works fully **offline** and never requires AI.
 
-> Status: early, pre-release (`0.1.0` in the workspace). The implementation
-> described below is merged on `main`. No tagged release or crates.io
-> publication exists yet. See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)
-> for exactly what works today. Only documented features exist.
+> Status: early, `0.1.0`. The implementation described below is merged on
+> `main`, and `v0.1.0` has prebuilt Linux, macOS, and Windows binaries on the
+> [Releases page](https://github.com/StellarFoundry/stellar-devkit/releases).
+> crates.io publication is still pending. See
+> [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for exactly what works
+> today. Only documented features exist.
 
 ## What works today
 
@@ -36,6 +38,10 @@ See [docs/IMPLEMENTED_CAPABILITIES.md](docs/IMPLEMENTED_CAPABILITIES.md) for
 exact scope and known limitations.
 
 ## Install and build
+
+Download a prebuilt binary from the
+[Releases page](https://github.com/StellarFoundry/stellar-devkit/releases), or
+build from source:
 
 ```bash
 cargo build --release
@@ -74,7 +80,7 @@ Decode commands accept `-` to read one bounded value from stdin. Exit codes:
   code-scanning permissions.
 - RPC configuration is currently consumed by `rpc-health`; other commands do not
   make network requests.
-- No tagged release, release binaries, or crates.io publication exists yet.
+- crates.io publication is still pending; binaries are on the Releases page.
 
 ## Relationship to other Stellar tooling
 
