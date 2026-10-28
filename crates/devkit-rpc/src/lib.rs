@@ -15,6 +15,9 @@
 
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::io::Read;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::Duration;
 
 use devkit_core::DevkitError;
 use serde::{Deserialize, Serialize};
@@ -146,6 +149,84 @@ impl Transport for MockTransport {
                 "mock transport has no queued response",
             ))
         })
+    }
+}
+
+
+/// A bounded HTTP JSON-RPC transport for a Stellar RPC endpoint.
+///
+/// Responses are capped before JSON parsing. Requests have a finite timeout,
+/// JSON-RPC identifiers are checked, and server error messages are returned as
+/// structured errors. Redirects are disabled by the HTTP client to avoid
+/// silently forwarding RPC requests to an unexpected host.
+pub struct HttpTransport {
+    endpoint: String,
+    client: reqwest::blocking::Client,
+    next_id: AtomicU64,
+}
+
+impl HttpTransport {
+    /// Creates a transport with an explicit request timeout.
+    pub fn new(endpoint: Endpoint, timeout: Duration) -> Result<Self, DevkitError> {
+        if timeout.is_zero() {
+            return Err(DevkitError::invalid("RPC timeout must be greater than zero"));
+        }
+        let client = reqwest::blocking::Client::builder()
+            .timeout(timeout)
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .map_err(|error| DevkitError::Io(format!("failed to build RPC HTTP client: {error}")))?;
+        Ok(Self {
+            endpoint: endpoint.as_str().to_owned(),
+            client,
+            next_id: AtomicU64::new(1),
+        })
+    }
+
+    /// Creates a transport with a 10-second request timeout.
+    pub fn with_default_timeout(endpoint: Endpoint) -> Result<Self, DevkitError> {
+        Self::new(endpoint, Duration::from_secs(10))
+    }
+}
+
+impl Transport for HttpTransport {
+    fn call(&self, method: &str, params: Value) -> Result<Value, DevkitError> {
+        if method.trim().is_empty() {
+            return Err(DevkitError::invalid("RPC method must not be empty"));
+        }
+        let id = self.next_id.fetch_add(1, Ordering::Relaxed);
+        let request = json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": method,
+            "params": params
+        });
+        let response = self.client.post(&self.endpoint).json(&request).send()
+            .map_err(|error| DevkitError::Io(format!("RPC HTTP request failed: {error}")))?;
+        let status = response.status();
+        let mut body = Vec::new();
+        response.take((MAX_RPC_RESPONSE_BYTES + 1) as u64).read_to_end(&mut body)
+            .map_err(|error| DevkitError::Io(format!("failed reading RPC response: {error}")))?;
+        if body.len() > MAX_RPC_RESPONSE_BYTES {
+            return Err(response_too_large());
+        }
+        if !status.is_success() {
+            return Err(DevkitError::Io(format!("RPC endpoint returned HTTP status {status}")));
+        }
+        let value: Value = serde_json::from_slice(&body).map_err(DevkitError::decode)?;
+        if value.get("jsonrpc").and_then(Value::as_str) != Some("2.0") {
+            return Err(DevkitError::decode("RPC response is missing JSON-RPC version 2.0"));
+        }
+        if value.get("id").and_then(Value::as_u64) != Some(id) {
+            return Err(DevkitError::decode("RPC response identifier does not match request"));
+        }
+        if let Some(error) = value.get("error") {
+            let code = error.get("code").and_then(Value::as_i64).unwrap_or_default();
+            let message = error.get("message").and_then(Value::as_str).unwrap_or("unknown RPC error");
+            return Err(DevkitError::decode(format!("RPC error {code}: {message}")));
+        }
+        value.get("result").cloned()
+            .ok_or_else(|| DevkitError::decode("RPC response has neither result nor error"))
     }
 }
 

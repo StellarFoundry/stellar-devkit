@@ -1,0 +1,13 @@
+[package]
+name = "devkit-contract"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Bounded, non-executing inspection of Soroban contract WASM artifacts."
+
+[dependencies]
+devkit-core.workspace = true
+serde.workspace = true
+wasmparser.workspace = true

@@ -5,6 +5,9 @@ members = [
     "crates/devkit-xdr",
     "crates/devkit-rpc",
     "crates/devkit-cli",
+    "crates/devkit-contract",
+    "crates/devkit-analysis",
+    "crates/devkit-config",
 ]
 
 [workspace.package]
@@ -29,6 +32,9 @@ stellar-strkey = "0.0.18"
 devkit-core = { path = "crates/devkit-core", version = "0.1.0" }
 devkit-xdr = { path = "crates/devkit-xdr", version = "0.1.0" }
 devkit-rpc = { path = "crates/devkit-rpc", version = "0.1.0" }
+devkit-contract = { path = "crates/devkit-contract", version = "0.1.0" }
+devkit-analysis = { path = "crates/devkit-analysis", version = "0.1.0" }
+devkit-config = { path = "crates/devkit-config", version = "0.1.0" }
 
 [profile.release]
 lto = "thin"

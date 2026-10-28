@@ -20,8 +20,7 @@ The core works fully **offline** and never requires AI.
 - `stellar-foundry` CLI — `version`, `doctor`, `strkey`, `scval`, `envelope`,
   `event`.
 
-Everything else (RPC, fixtures, contract inspection, security analysis) is
-planned and tracked as issues; it is not implemented.
+Library APIs now include bounded HTTP RPC transport, structural WASM inspection, deterministic structural findings with SARIF serialization, and validated TOML configuration. See [docs/IMPLEMENTED_CAPABILITIES.md](docs/IMPLEMENTED_CAPABILITIES.md) for exact scope and known limitations. CLI integration for these APIs remains planned.
 
 ## Install and build
 
