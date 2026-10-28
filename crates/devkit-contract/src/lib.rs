@@ -1,9 +1,8 @@
 //! Bounded structural inspection for untrusted Soroban contract WASM.
 //!
 //! This crate validates the WASM container but never executes it. The
-//! contractspecv0 custom section is detected and sized; decoding individual
-//! XDR specification entries is intentionally reported as a limitation until
-//! a versioned spec model is added.
+//! `contractspecv0` is decoded as a bounded stream of official Stellar XDR
+//! `ScSpecEntry` values. This crate never executes contract code.
 
 use std::io::Cursor;
 
