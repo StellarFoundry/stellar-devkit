@@ -12,9 +12,9 @@ Stellar developers routinely need to inspect XDR values, transactions, events, c
 
 The project complements official Stellar tooling; it should not claim to replace the official CLI or RPC client.
 
-## Implementation status on the current feature branch
+## Implementation status on the current combined PR branch
 
-Implemented in the PR under review (not yet merged to `main`):
+The combined branch for PR #133 includes the feature work and the security-hardening changes from PR #127. This combined work is still under review and has **not** been merged to `main`.
 
 - Bounded base64 decoding for `ScVal`, `TransactionEnvelope`, and `ContractEvent`, with structured errors and malformed-input regression fixtures.
 - RPC endpoint policy validation and a typed RPC client with deterministic mock transport.
@@ -23,9 +23,9 @@ Implemented in the PR under review (not yet merged to `main`):
 - Deterministic structural analysis findings with stable rule IDs and SARIF 2.1.0 serialization.
 - Strict TOML configuration parsing, timeout validation, environment overrides, and static diagnostic events.
 - CLI commands for WASM inspection, WASM analysis, and explicit RPC health checks.
-- CI for formatting, Clippy, and Linux/Windows/macOS tests; a RustSec dependency-audit workflow; release-validation workflow and release checklist.
+- Pinned CI actions, locked dependency resolution, a dedicated Rust 1.91.0 MSRV job, RustSec dependency auditing, release-validation workflow, and release checklist.
 
-See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), and the open pull requests for exact scope.
+See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), [CHANGELOG.md](../CHANGELOG.md), and [PR #133](https://github.com/StellarFoundry/stellar-devkit/pull/133) for exact scope.
 
 ## Known limitations (must be represented honestly)
 
@@ -33,7 +33,6 @@ See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.
 - Analysis rules are structural heuristics, not a complete vulnerability detector and not proof of malicious intent.
 - SARIF serialization exists, but automatic upload to GitHub code scanning is not configured.
 - The configuration library parses TOML and environment overrides, but it is not yet fully wired into all CLI commands; `rpc-health` currently accepts an explicit endpoint argument.
-- The feature and hardening PR branches have passed their recorded CI runs individually, but a combined integration run is required after reconciling their divergent bases.
 - No claim is made here that the project has published crates or release binaries, has a large user base, or is approved for a Wave.
 
 ## Contributor workflow
@@ -41,7 +40,7 @@ See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.
 - Issues are labeled by `area/*`, `type/*`, `difficulty/*`, and `phase/*`.
 - Contributors request assignment before starting and follow each issue's scope and acceptance criteria.
 - PRs reference the relevant issue, include tests and documentation, and report commands and results truthfully.
-- The repository gate is `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings`, and `cargo test --workspace --all-features`. CI additionally exercises Linux, Windows, and macOS; release validation checks packaging.
+- The repository gate is `cargo fmt --all -- --check`, `cargo clippy --locked --workspace --all-targets --all-features -- -D warnings`, and `cargo test --locked --workspace --all-features`. CI runs on Linux, Windows, and macOS and includes Rust 1.91.0 MSRV tests; release validation checks packaging.
 
 ## Issue quality and backlog
 
@@ -53,13 +52,11 @@ See [SECURITY.md](../SECURITY.md), [TESTING.md](TESTING.md), and [RELEASE_CHECKL
 
 ## Appeal readiness checklist
 
-Before applying, confirm all of the following:
-
-- [ ] Both pull requests have been reviewed against the current `main` base and their integration strategy is explicit.
-- [ ] A combined change set has passed required CI after reconciliation, including Linux, Windows, macOS, formatting, and Clippy.
-- [ ] The lockfile and dependency audit are consistent with the final manifest.
-- [ ] User-facing documentation, project status, and changelog accurately reflect what is merged versus still proposed.
-- [ ] The application describes concrete completed work, links to the actual PRs and tests, and distinguishes limitations from delivered functionality.
+- [x] Both PR heads are included in a combined review branch; PR #127 remains open and unmerged.
+- [x] The combined implementation passed CI on Linux, Windows, and macOS, plus formatting, Clippy, and Rust 1.91.0 MSRV tests.
+- [ ] The RustSec audit has passed against the regenerated lockfile on the final combined head.
+- [x] User-facing documentation, project status, and changelog distinguish proposed work from work merged to `main`.
+- [ ] The application is finalized with links to the combined PR, CI results, and concrete completed work.
 - [ ] A maintainer/program administrator has confirmed the applicable Wave application process and eligibility.
 
-Passing CI is necessary but does not by itself establish acceptance criteria, maintainer approval, or Drips eligibility. Do not submit an appeal until the integration and program-specific requirements are verified.
+Passing CI is necessary but does not by itself establish maintainer approval or Drips eligibility. Do not submit an appeal until the final dependency audit and program-specific requirements are verified.
