@@ -71,16 +71,15 @@ of it and leaves room to add more later.
 ## Excluded after the post-merge audit
 
 These issues were on older board drafts but are implemented or partially
-implemented on `main`. They are excluded until a maintainer closes or re-scopes
-them:
+implemented on `main`. They are not available as Wave work:
 
 | # | Status |
 | - | ------ |
-| #1 | Bounded HTTP transport exists; official `stellar-rpc-client` integration remains |
-| #7 | Configuration exists and is wired into `rpc-health`; `docs/CONFIGURATION.md` now documents it; precedence tests remain |
-| #20 | Fuzz crate, three targets, and a scheduled workflow exist |
-| #25 | `contractspecv0` decoding exists; a fixture-WASM spec test and normalized ABI remain |
-| #33 | CLI exit-code assertions exist in `crates/devkit-cli/tests/json_errors.rs` |
+| #1 | `status/needs-revision` — bounded HTTP transport exists; official `stellar-rpc-client` integration remains |
+| #7 | `status/needs-revision` — configuration exists; `docs/CONFIGURATION.md` documents it; precedence tests remain |
+| #20 | **Closed as completed** — fuzz crate, three targets, and a scheduled workflow exist |
+| #25 | `status/needs-revision` — `contractspecv0` decoding exists; a fixture-WASM spec test and normalized ABI remain |
+| #33 | **Closed as completed** — CLI exit-code assertions exist |
 
 `#40` and `#98` are also excluded from this board because they depend on issues
 not in this set (error taxonomy and structured logging respectively).

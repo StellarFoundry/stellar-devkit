@@ -79,11 +79,10 @@ workflow and checklist exist, but publishing remains outstanding work.
 
 ## Contributor backlog
 
-There are 112 open issues: 82 Drips-ready, 24 blocked by dependencies, 3 needing
-revision, and 3 deferred. Five of the 82 are implemented or partially
-implemented on `main` and are excluded from the Wave board pending closure or
-re-scope (#1, #7, #20, #25, #33). The backlog is a roadmap, not a list of
-completed features. Audit counts, labels, and issue descriptions must not be presented as
+There are 110 open issues: 77 Drips-ready, 24 blocked by dependencies, 6 needing
+revision, and 3 deferred. #20 and #33 were closed as completed after the merge;
+#1, #7, and #25 are partially implemented and marked `status/needs-revision`.
+The backlog is a roadmap, not a list of completed features. Audit counts, labels, and issue descriptions must not be presented as
 proof that the corresponding work is implemented.
 
 See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md),

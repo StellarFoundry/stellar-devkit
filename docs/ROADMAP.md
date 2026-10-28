@@ -31,7 +31,7 @@ This roadmap distinguishes **Completed** (works today), **In progress**, and
 
 ## Planned (issue-backed phases)
 
-There are 112 open issues. The counts below come from the current labels.
+There are 110 open issues. The counts below come from the current labels.
 
 | Phase | Focus | Issues |
 | ----- | ----- | ------ |
@@ -41,8 +41,8 @@ There are 112 open issues. The counts below come from the current labels.
 | 04 Analysis | Envelope/operation/fee/signature/memo/bounds/footprint/result analysis, events, ledger helpers | 15 |
 | 05 Contracts | Contract IDs, storage, events-to-spec, environment, CLI | 10 |
 | 06 Testing | Fixture loader, snapshots, cross-platform, corpus runner, WASM fixtures | 7 |
-| 07 Security | Rule engine, findings, suppression, corpus, FP/FN tests, metadata/WASM/RPC hardening, SARIF catalog | 12 |
-| 08 CLI / config | Configuration, profiles, global flags, error UX, verbosity, JSON errors, stdin | 8 |
+| 07 Security | Rule engine, findings, suppression, corpus, FP/FN tests, metadata/WASM/RPC hardening, SARIF catalog | 11 |
+| 08 CLI / config | Configuration, profiles, global flags, error UX, verbosity, JSON errors, stdin | 7 |
 | 09 GitHub / CI | Action, reusable workflow, SARIF upload, baseline, triage, auditing | 10 |
 | 10 Performance / observability | RPC and decode benchmarks, cache, regression tests, logging | 5 |
 | 12 Release | Versioning policy, crates.io readiness, SBOM, compatibility matrix | 7 |

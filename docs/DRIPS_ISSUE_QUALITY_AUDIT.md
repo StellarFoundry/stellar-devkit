@@ -1,8 +1,8 @@
 # Drips Issue Quality Audit
 
 - **Audit date:** 2026-10-28
-- **Repository commit audited:** aec759c
-- **Issues classified:** 112 open issues.
+- **Repository commit audited:** 1f91cbf
+- **Issues classified:** 110 open issues.
 
 Standard applied: Drips *Creating Meaningful Issues* and the Wave maintainer
 documentation. Classification is evidence-based; weak issues are flagged, not
@@ -12,17 +12,17 @@ hidden. Nothing here claims Drips approval.
 
 | Classification | Count |
 |---|---:|
-| Drips-ready | 82 |
-| Needs revision | 3 |
+| Drips-ready | 77 |
+| Needs revision | 6 |
 | Must split | 0 |
 | Must merge | 0 |
 | Remove | 0 |
 | Defer | 3 |
 | Blocked | 24 |
 
-> **Post-merge note (2026-10-28):** #1, #7, #20, #25,
-> and #33 have merged or partial implementation on `main` and are excluded
-> from `docs/WAVE_BOARD.md` pending maintainer closure or re-scope.
+> **Post-merge note (2026-10-28):** #20 and #33 were
+> implemented in the merged work and closed. #1, #7, and #25 are partially
+> implemented and marked `status/needs-revision`. See `docs/WAVE_BOARD.md`.
 
 No issue required splitting: the largest issues are already scoped to a single
 capability, and the previously broad areas had already been decomposed.
@@ -35,10 +35,10 @@ through its own system.
 
 | Complexity | Count |
 |---|---:|
-| High | 27 |
+| High | 26 |
 | Medium | 78 |
-| Trivial | 7 |
-| **Total** | **112** |
+| Trivial | 6 |
+| **Total** | **110** |
 
 No complexity label was changed during this audit: no issue was found to be
 clearly underpriced or overpriced. Complexity was not inflated.
@@ -47,7 +47,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 ### #1 — feat(rpc): implement a live HTTP transport over the official client
 
-- Classification: **Drips-ready**
+- Classification: **Needs revision**
 - Complexity: high
 - Area: rpc
 - Impact: PASS — maps to a real capability of the toolkit.
@@ -58,7 +58,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Security: N/A or addressed where relevant.
 - Dependencies: None.
 - Duplication: PASS.
-- Final recommendation: Drips-ready.
+- Final recommendation: Needs revision.
 
 ### #2 — feat(rpc): add timeouts and cancellation to RPC calls
 
@@ -137,7 +137,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 ### #7 — feat(core): add a configuration system with file and environment support
 
-- Classification: **Drips-ready**
+- Classification: **Needs revision**
 - Complexity: medium
 - Area: core
 - Impact: PASS — maps to a real capability of the toolkit.
@@ -148,7 +148,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Security: N/A or addressed where relevant.
 - Dependencies: None.
 - Duplication: PASS.
-- Final recommendation: Drips-ready.
+- Final recommendation: Needs revision.
 
 ### #8 — feat(config): resolve network profiles and custom endpoints
 
@@ -330,21 +330,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
-### #20 — test(security): add a fuzz target for XDR and SCVal decoding
-
-- Classification: **Drips-ready**
-- Complexity: high
-- Area: security
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: None.
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
 ### #21 — feat(security): harden the HTTP transport against SSRF and unsafe redirects
 
 - Classification: **Blocked by dependency**
@@ -407,7 +392,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 ### #25 — feat(contracts): inspect WASM contract specs via soroban-spec
 
-- Classification: **Drips-ready**
+- Classification: **Needs revision**
 - Complexity: high
 - Area: contract-inspection
 - Impact: PASS — maps to a real capability of the toolkit.
@@ -418,7 +403,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Security: N/A or addressed where relevant.
 - Dependencies: None.
 - Duplication: PASS.
-- Final recommendation: Drips-ready.
+- Final recommendation: Needs revision.
 
 ### #26 — feat(transactions): add an envelope summary command
 
@@ -524,21 +509,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Dependencies: #7
 - Duplication: PASS.
 - Final recommendation: Blocked by dependency.
-
-### #33 — test(cli): assert the exit-code contract
-
-- Classification: **Drips-ready**
-- Complexity: trivial
-- Area: cli
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: None.
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
 
 ### #34 — ci(msrv): pin and test a minimum supported Rust version
 
@@ -1729,13 +1699,11 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 | Issue | Title | Complexity | Area | Why it is Wave-ready |
 |---|---|---:|---|---|
-| #1 | feat(rpc): implement a live HTTP transport over the official client | high | rpc | Depends only on implemented or independent work; testable. |
 | #2 | feat(rpc): add timeouts and cancellation to RPC calls | medium | rpc | Depends only on implemented or independent work; testable. |
 | #3 | feat(rpc): add exponential backoff with jitter to retries | medium | rpc | Depends only on implemented or independent work; testable. |
 | #4 | feat(rpc): add a typed model for getLedgerEntries | medium | rpc | Depends only on implemented or independent work; testable. |
 | #5 | feat(rpc): add typed models for getTransaction and getTransactions | medium | rpc | Depends only on implemented or independent work; testable. |
 | #6 | feat(rpc): add a typed model for getFeeStats | trivial | rpc | Depends only on implemented or independent work; testable. |
-| #7 | feat(core): add a configuration system with file and environment support | medium | core | Depends only on implemented or independent work; testable. |
 | #8 | feat(config): resolve network profiles and custom endpoints | medium | rpc | Depends only on implemented or independent work; testable. |
 | #10 | feat(core): add structured logging with levels | medium | core | Depends only on implemented or independent work; testable. |
 | #11 | feat(scval): add curated human-readable rendering for common SCVal types | high | xdr | Depends only on implemented or independent work; testable. |
@@ -1747,17 +1715,14 @@ clearly underpriced or overpriced. Complexity was not inflated.
 | #17 | feat(testing): add a fixture loader and schema | high | testing | Depends only on implemented or independent work; testable. |
 | #18 | feat(testing): add mock RPC network scenarios | medium | rpc | Depends only on implemented or independent work; testable. |
 | #19 | test(xdr): add property-based round-trip tests | medium | xdr | Depends only on implemented or independent work; testable. |
-| #20 | test(security): add a fuzz target for XDR and SCVal decoding | high | security | Depends only on implemented or independent work; testable. |
 | #22 | feat(security): redact secrets in logs and output | medium | security | Depends only on implemented or independent work; testable. |
 | #24 | feat(github): add a composite Action to run DevKit checks | high | github | Depends only on implemented or independent work; testable. |
-| #25 | feat(contracts): inspect WASM contract specs via soroban-spec | high | contract-inspection | Depends only on implemented or independent work; testable. |
 | #26 | feat(transactions): add an envelope summary command | medium | transactions | Depends only on implemented or independent work; testable. |
 | #27 | feat(events): add a typed getEvents model with pagination | high | rpc | Depends only on implemented or independent work; testable. |
 | #28 | perf(observability): benchmark decode throughput | medium | observability | Depends only on implemented or independent work; testable. |
 | #29 | ci(release): build and attach cross-platform release binaries | high | release | Depends only on implemented or independent work; testable. |
 | #30 | feat(cli): add shell completion generation | trivial | cli | Depends only on implemented or independent work; testable. |
 | #31 | ci(deps): configure automated dependency updates | trivial | release | Depends only on implemented or independent work; testable. |
-| #33 | test(cli): assert the exit-code contract | trivial | cli | Depends only on implemented or independent work; testable. |
 | #34 | ci(msrv): pin and test a minimum supported Rust version | medium | release | Depends only on implemented or independent work; testable. |
 | #36 | feat(core): define a categorized error taxonomy | medium | core | Depends only on implemented or independent work; testable. |
 | #37 | feat(core): add shared Severity and Confidence models | medium | core | Depends only on implemented or independent work; testable. |
@@ -1816,9 +1781,12 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 | Issue | Problem | Required Action |
 |---|---|---|
+| #1 | Needs revision | Revise the issue body before it can be Wave-ready. |
+| #7 | Needs revision | Revise the issue body before it can be Wave-ready. |
 | #9 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #21 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #23 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
+| #25 | Needs revision | Revise the issue body before it can be Wave-ready. |
 | #32 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #35 | Defer / future work | Label status/deferred; revisit when the subsystem is planned. |
 | #42 | Defer / future work | Label status/deferred; revisit when the subsystem is planned. |
