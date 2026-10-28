@@ -14,23 +14,23 @@
 - `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and `ContractEvent`; strkey classification; malformed-input regression fixtures.
 - `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`, `endpoint`, `inspect-wasm`, `analyze-wasm`, and `rpc-health`; terminal/JSON output, SARIF output for analysis, and exit codes 0/2/3.
 - `devkit-rpc`: typed RPC protocol layer, deterministic mock transport, endpoint validation, typed health/network/latest-ledger results, retry policy, and bounded HTTP JSON-RPC transport.
-- `devkit-contract`: bounded, non-executing WASM validation and import/export/custom-section metadata.
+- `devkit-contract`: bounded, non-executing WASM validation, import/export/custom-section metadata, and bounded `contractspecv0` XDR stream decoding into entry kind/name/definition records.
 - `devkit-analysis`: deterministic structural findings with stable rule IDs and SARIF 2.1.0 serialization.
 - `devkit-config`: strict TOML parsing, timeout validation, environment overrides, and static diagnostics.
 - CI: pinned actions, locked dependency resolution, formatting, Clippy, Linux/Windows/macOS tests, and Rust 1.91.0 MSRV tests.
-- Security: RustSec dependency audit workflow and bounded malformed-XDR regression corpus.
+- Security: RustSec dependency audit workflow, bounded malformed-XDR regression corpus, and a manual SARIF upload workflow for GitHub code scanning.
 - Release preparation: release-validation workflow, release checklist, implementation-capabilities documentation, updated changelog, and Drips readiness checklist.
 
 ## Verified CI status
 
-The final combined branch at `f3d2bc8dace0e4d4c0e77871c931cfb82ae87ddd` passed all six CI jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. The RustSec audit also completed successfully against the regenerated lockfile; see [audit run #40680053077](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053077).
+The previously integrated branch passed formatting, Clippy, Linux, Windows, macOS, and Rust 1.91.0 MSRV tests, plus RustSec. New contract-spec decoding, CLI config wiring, and SARIF workflow changes are awaiting a fresh combined CI and audit run before merge.
 
 ## Remaining limitations
 
-- `contractspecv0` is detected and sized but individual XDR specification entries are not yet decoded into typed function/struct/enum metadata.
+- `contractspecv0` entries are decoded into XDR-JSON definitions with variant names and best-effort declared names; this is not yet a fully normalized ABI schema for every entry type.
 - Security-analysis rules are structural heuristics, not a comprehensive vulnerability engine.
-- SARIF serialization is implemented; automatic GitHub code-scanning upload is not configured.
-- The configuration library exists, but it is not yet fully wired into every CLI command. `rpc-health` takes an explicit endpoint argument.
+- SARIF upload is available through a manually triggered workflow; it requires a repository-relative WASM artifact and GitHub code-scanning permissions.
+- RPC configuration is wired into `rpc-health`: command-line endpoint overrides environment, which overrides the TOML file. Other commands do not consume RPC configuration because they do not need it.
 - Do not describe unmerged work as already released or available from `main`.
 
 ## Security status
