@@ -35,10 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - These changes are on open pull-request branches and are not all merged to
   `main`.
-- WASM contract specification entries are detected and sized, but individual
-  `contractspecv0` XDR entries are not yet decoded into typed metadata.
+- `contractspecv0` XDR entries are decoded into official XDR-JSON definitions
+  with a variant kind and best-effort name; a normalized ABI schema remains future work.
 - Analysis findings are structural heuristics, not a comprehensive
   vulnerability detector.
-- SARIF serialization is available; automated GitHub code-scanning upload is
-  not configured.
+- SARIF upload requires manual workflow dispatch, a repository-relative WASM
+  artifact, and GitHub code-scanning permissions.
 - The configuration API is currently wired into `rpc-health`; other commands do not consume RPC configuration because they do not need it.
