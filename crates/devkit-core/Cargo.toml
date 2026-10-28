@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-core"
+keywords = ["stellar", "soroban", "devkit", "developer-tools"]
+categories = ["development-tools"]
 description = "Core types, errors, configuration, and network profiles for StellarFoundry DevKit."
 
 [dependencies]

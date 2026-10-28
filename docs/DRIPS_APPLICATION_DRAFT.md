@@ -89,8 +89,8 @@ available.
   artifact exists and code-scanning permissions are available.
 - RPC configuration is wired into `rpc-health`; other commands do not consume
   RPC settings.
-- crates.io publication is still pending; install from the GitHub Release or
-  build from source.
+- crates.io publication is prepared but still pending; install from the GitHub
+  Release or build from source. See `docs/PUBLISHING.md`.
 - External adoption is limited; no independent external contributor has merged a
   PR yet.
 

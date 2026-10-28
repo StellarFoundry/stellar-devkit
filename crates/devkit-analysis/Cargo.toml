@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-analysis"
+keywords = ["stellar", "soroban", "sarif", "static-analysis"]
+categories = ["development-tools"]
 description = "Deterministic structural security checks and SARIF output for Soroban WASM."
 
 [dependencies]

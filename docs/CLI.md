@@ -27,15 +27,17 @@ Validates a Stellar strkey and reports its kind (`account`, `contract`, or
 
 ### `scval <BASE64|->`
 
-Decodes a base64 XDR `ScVal` into JSON. Pass `-` to read one value from stdin, for example `printf 'AAAAAwAAACo=' | stellar-foundry --format json scval -`.
+Decodes a base64 XDR `ScVal` into a versioned JSON document. Pass `-` to read one value from stdin, for example `printf 'AAAAAwAAACo=' | stellar-foundry --format json scval -`.
 
 ### `envelope <BASE64|->`
 
-Decodes a base64 XDR `TransactionEnvelope` into JSON. Pass `-` to read one value from stdin.
+Decodes a base64 XDR `TransactionEnvelope` into a versioned JSON document. Pass `-` to read one value from stdin.
 
 ### `event <BASE64|->`
 
-Decodes a base64 XDR `ContractEvent` into JSON. Pass `-` to read one value from stdin.
+Decodes a base64 XDR `ContractEvent` into a versioned JSON document. Pass `-` to read one value from stdin.
+
+Decoded output includes `schema_version`, `kind`, and `value`. Add the global `--raw` flag to also echo the canonical base64 input as `raw_xdr`. See [XDR.md](XDR.md) and [SCVAL.md](SCVAL.md) for the schema and migration policy.
 
 When `-` is supplied, stdin must be piped or redirected; the CLI never waits for interactive terminal input. Input is limited to 16 MiB and must be valid UTF-8. Only one value is read; streaming multiple values is not supported.
 
@@ -86,5 +88,7 @@ The category is one of `usage`, `decode`, `encode`, `invalid_input`, `configurat
 ## Output stability
 
 - `terminal` output is human-oriented and may change.
-- `json` output is machine-readable. Until a versioned schema is published
-  (tracked as an issue), treat the shape as unstable.
+- `json` output for `scval`, `envelope`, and `event` is machine-readable and
+  versioned. Consumers must check `schema_version` (currently `1.0`) before
+  using the payload; see [XDR.md](XDR.md). Other JSON shapes remain
+  human-oriented until they gain their own versioned envelope.

@@ -37,7 +37,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Tests
 
-43 tests across unit, integration, malformed-corpus, and CLI tests. Run with
+51 tests across unit, integration, malformed-corpus, and CLI tests. Run with
 `cargo test --locked --workspace --all-features`. CI runs the same suite on
 Linux, Windows, and macOS, plus an MSRV job on Rust 1.91.0.
 
@@ -73,7 +73,8 @@ x86_64 archives plus SHA256 checksums:
 
 <https://github.com/StellarFoundry/stellar-devkit/releases/tag/v0.1.0>
 
-crates.io publication is still pending.
+crates.io publication is prepared but still pending; see
+[PUBLISHING.md](PUBLISHING.md).
 
 ## Issue backlog
 

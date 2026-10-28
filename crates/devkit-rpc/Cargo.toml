@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-rpc"
+keywords = ["stellar", "soroban", "rpc", "json-rpc"]
+categories = ["development-tools", "network-programming", "api-bindings"]
 description = "Typed Stellar RPC protocol layer with an injectable transport for deterministic tests."
 
 [dependencies]

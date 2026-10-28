@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-contract"
+keywords = ["stellar", "soroban", "wasm", "contracts"]
+categories = ["development-tools", "wasm", "parser-implementations"]
 description = "Bounded, non-executing inspection of Soroban contract WASM artifacts."
 
 [dependencies]

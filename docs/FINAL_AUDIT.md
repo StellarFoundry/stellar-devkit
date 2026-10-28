@@ -9,7 +9,7 @@ Audit date: 2026-10-28. Commit: `aec759c`.
 | Item | Status | Evidence |
 | ---- | ------ | -------- |
 | Build succeeds | Verified | `cargo build` |
-| Tests pass | Verified | `cargo test --locked --workspace --all-features` (43 tests); post-merge CI |
+| Tests pass | Verified | `cargo test --locked --workspace --all-features` (51 tests); post-merge CI |
 | Lint passes | Verified | `cargo clippy --locked --all-targets --all-features -- -D warnings` |
 | Formatting passes | Verified | `cargo fmt --all -- --check` |
 | CI passes | Verified | CI run 40690141880 on Linux/Windows/macOS |
@@ -27,7 +27,7 @@ Audit date: 2026-10-28. Commit: `aec759c`.
 | Performance measured | Partial | Memory measurement example; benchmarks pending |
 | Composite GitHub Action | Pending | Tracked as an issue; only manual SARIF upload exists |
 | Tagged release + binaries | Verified | `v0.1.0` with Linux/macOS/Windows archives and SHA256 checksums |
-| crates.io publication | Pending | No crates.io package yet |
+| crates.io publication | Pending | Publish workflow and docs ready; requires `CARGO_REGISTRY_TOKEN` |
 | External contributors | Pending | No independent external contributor has merged a PR yet |
 
 ## Notes
