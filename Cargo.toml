@@ -5,11 +5,15 @@ members = [
     "crates/devkit-xdr",
     "crates/devkit-rpc",
     "crates/devkit-cli",
+    "crates/devkit-contract",
+    "crates/devkit-analysis",
+    "crates/devkit-config",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.91"
 license = "Apache-2.0"
 authors = ["StellarFoundry"]
 repository = "https://github.com/StellarFoundry/stellar-devkit"
@@ -25,10 +29,15 @@ anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 stellar-xdr = { version = "28.0.0", features = ["serde", "base64", "alloc"] }
 stellar-strkey = "0.0.18"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+wasmparser = "0.219"
 
 devkit-core = { path = "crates/devkit-core", version = "0.1.0" }
 devkit-xdr = { path = "crates/devkit-xdr", version = "0.1.0" }
 devkit-rpc = { path = "crates/devkit-rpc", version = "0.1.0" }
+devkit-contract = { path = "crates/devkit-contract", version = "0.1.0" }
+devkit-analysis = { path = "crates/devkit-analysis", version = "0.1.0" }
+devkit-config = { path = "crates/devkit-config", version = "0.1.0" }
 
 [profile.release]
 lto = "thin"

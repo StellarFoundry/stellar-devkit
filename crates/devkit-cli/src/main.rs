@@ -6,8 +6,10 @@
 //! * `3` runtime error (decode failure, I/O)
 
 use std::{
+    fs,
     io::{self, IsTerminal, Read},
     process::ExitCode,
+    time::Duration,
 };
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -23,13 +25,14 @@ const MAX_STDIN_BYTES: usize = 16 * 1024 * 1024;
 enum FormatArg {
     Terminal,
     Json,
+    Sarif,
 }
 
 impl From<FormatArg> for OutputFormat {
     fn from(value: FormatArg) -> Self {
         match value {
             FormatArg::Terminal => OutputFormat::Terminal,
-            FormatArg::Json => OutputFormat::Json,
+            FormatArg::Json | FormatArg::Sarif => OutputFormat::Json,
         }
     }
 }
@@ -38,6 +41,10 @@ impl From<FormatArg> for OutputFormat {
 #[derive(Debug, Parser)]
 #[command(name = "stellar-foundry", version, about, long_about = None)]
 struct Cli {
+    /// Optional TOML configuration file (used by commands that support configuration).
+    #[arg(long, global = true)]
+    config: Option<String>,
+
     /// Output format.
     #[arg(long, value_enum, default_value_t = FormatArg::Terminal, global = true)]
     format: FormatArg,
@@ -76,6 +83,15 @@ enum Command {
     Endpoint {
         /// The endpoint URL to validate.
         url: String,
+    },
+    /// Inspect a WASM module without executing it.
+    InspectWasm { path: String },
+    /// Run structural checks against a WASM module; --format sarif emits SARIF 2.1.0.
+    AnalyzeWasm { path: String },
+    /// Query getHealth from an explicitly supplied Stellar RPC endpoint.
+    RpcHealth {
+        /// RPC endpoint; overrides config file and environment.
+        endpoint: Option<String>,
     },
 }
 
@@ -157,6 +173,7 @@ fn print_json_error(category: &str, message: &str) {
 
 fn run(cli: Cli) -> Result<u8, CliError> {
     let format: OutputFormat = cli.format.into();
+    let config_path = cli.config.clone();
     match cli.command {
         Command::Version => {
             println!("{TOOL_NAME} {VERSION}");
@@ -191,6 +208,54 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             print_value(format, &xdr::summary("contract_event", &decoded));
             Ok(EXIT_SUCCESS)
         }
+        Command::InspectWasm { path } => {
+            let bytes = read_wasm(&path)?;
+            let report = devkit_contract::inspect_wasm(&bytes).map_err(runtime)?;
+            let value = serde_json::to_value(&report)
+                .map_err(|error| CliError::new(EXIT_ERROR, "internal", error.to_string()))?;
+            print_value(format, &value);
+            Ok(EXIT_SUCCESS)
+        }
+        Command::AnalyzeWasm { path } => {
+            let bytes = read_wasm(&path)?;
+            let report = devkit_contract::inspect_wasm(&bytes).map_err(runtime)?;
+            let findings = devkit_analysis::analyze(&report);
+            if cli.format == FormatArg::Sarif {
+                println!("{}", devkit_analysis::to_sarif(&findings, Some(&path)));
+            } else {
+                let count = findings.len();
+                print_value(
+                    format,
+                    &serde_json::json!({ "findings": findings, "count": count }),
+                );
+            }
+            Ok(EXIT_SUCCESS)
+        }
+        Command::RpcHealth { endpoint } => {
+            let mut config = load_config(config_path.as_deref())?;
+            config
+                .apply_environment()
+                .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?;
+            let endpoint = endpoint.or(config.rpc_url).ok_or_else(|| {
+                CliError::new(
+                    EXIT_USAGE,
+                    "configuration",
+                    "provide an RPC endpoint argument, set rpc_url in the config file, or set STELLAR_FOUNDRY_RPC_URL",
+                )
+            })?;
+            devkit_config::diagnostic(config.verbose, "rpc_health_start");
+            let endpoint = devkit_rpc::Endpoint::parse(&endpoint).map_err(runtime)?;
+            let transport =
+                devkit_rpc::HttpTransport::new(endpoint, Duration::from_millis(config.timeout_ms))
+                    .map_err(runtime)?;
+            let health = devkit_rpc::Client::new(transport)
+                .health()
+                .map_err(runtime)?;
+            let value = serde_json::to_value(health)
+                .map_err(|error| CliError::new(EXIT_ERROR, "internal", error.to_string()))?;
+            print_value(format, &value);
+            Ok(EXIT_SUCCESS)
+        }
         Command::Endpoint { url } => {
             let endpoint = devkit_rpc::Endpoint::parse(&url).map_err(runtime)?;
             let report = serde_json::json!({
@@ -218,12 +283,95 @@ fn doctor(format: OutputFormat) {
     let report = serde_json::json!({
         "tool": TOOL_NAME,
         "version": VERSION,
-        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event", "endpoint_validation"],
+        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event", "endpoint_validation", "wasm_inspection", "wasm_analysis", "rpc_health"],
         "networks": networks,
-        "network_access": "none (offline decoding only)",
-        "rpc_transport": "mock only (no live transport yet)",
+        "network_access": "explicit only (rpc-health command)",
+        "rpc_transport": "bounded HTTP JSON-RPC and deterministic mock",
     });
     print_value(format, &report);
+}
+
+/// Load optional TOML configuration with a strict size limit. Environment
+/// overrides are applied by the command so unrelated CLI commands remain
+/// independent of RPC-specific environment variables.
+fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
+    const MAX_CONFIG_BYTES: u64 = 1024 * 1024;
+    let config = if let Some(path) = path {
+        let metadata = fs::metadata(path).map_err(|error| {
+            CliError::new(
+                EXIT_ERROR,
+                "io",
+                format!("failed to inspect config file: {error}"),
+            )
+        })?;
+        if metadata.len() > MAX_CONFIG_BYTES {
+            return Err(CliError::new(
+                EXIT_USAGE,
+                "configuration",
+                "config file exceeds the 1048576-byte limit",
+            ));
+        }
+        let content = fs::read_to_string(path).map_err(|error| {
+            CliError::new(
+                EXIT_ERROR,
+                "io",
+                format!("failed to read config file: {error}"),
+            )
+        })?;
+        if content.len() as u64 > MAX_CONFIG_BYTES {
+            return Err(CliError::new(
+                EXIT_USAGE,
+                "configuration",
+                "config file exceeds the 1048576-byte limit",
+            ));
+        }
+        devkit_config::Config::parse_toml(&content)
+            .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?
+    } else {
+        devkit_config::Config::default()
+    };
+    config
+        .validate()
+        .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?;
+    Ok(config)
+}
+
+fn read_wasm(path: &str) -> Result<Vec<u8>, CliError> {
+    let metadata = fs::metadata(path).map_err(|error| {
+        CliError::new(
+            EXIT_ERROR,
+            "io",
+            format!("failed to inspect WASM file: {error}"),
+        )
+    })?;
+    if metadata.len() > devkit_contract::MAX_WASM_BYTES as u64 {
+        return Err(CliError::new(
+            EXIT_ERROR,
+            "invalid_input",
+            format!(
+                "WASM exceeds the {}-byte limit",
+                devkit_contract::MAX_WASM_BYTES
+            ),
+        ));
+    }
+    let bytes = fs::read(path).map_err(|error| {
+        CliError::new(
+            EXIT_ERROR,
+            "io",
+            format!("failed to read WASM file: {error}"),
+        )
+    })?;
+    if bytes.len() > devkit_contract::MAX_WASM_BYTES {
+        return Err(CliError::new(
+            EXIT_ERROR,
+            "invalid_input",
+            format!(
+                "WASM exceeds the {}-byte limit",
+                devkit_contract::MAX_WASM_BYTES
+            ),
+        ));
+    }
+    Ok(bytes)
 }
 
 /// Resolve a decode argument, reading bounded UTF-8 input only when explicitly asked.
@@ -282,4 +430,42 @@ fn runtime(error: devkit_core::DevkitError) -> CliError {
         DevkitError::Io(_) => "io",
     };
     CliError::new(EXIT_ERROR, category, error.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loads_rpc_config_file() {
+        let path = std::env::temp_dir().join(format!(
+            "stellar-foundry-config-{}.toml",
+            std::process::id()
+        ));
+        fs::write(
+            &path,
+            "rpc_url = \"https://soroban-testnet.stellar.org\"\ntimeout_ms = 2500\nverbose = true\n",
+        )
+        .expect("write temporary config");
+        let config = load_config(path.to_str()).expect("valid config");
+        let _ = fs::remove_file(&path);
+        assert_eq!(
+            config.rpc_url.as_deref(),
+            Some("https://soroban-testnet.stellar.org")
+        );
+        assert_eq!(config.timeout_ms, 2500);
+        assert!(config.verbose);
+    }
+
+    #[test]
+    fn rejects_unknown_config_keys() {
+        let path = std::env::temp_dir().join(format!(
+            "stellar-foundry-invalid-config-{}.toml",
+            std::process::id()
+        ));
+        fs::write(&path, "unexpected = true\n").expect("write temporary config");
+        let result = load_config(path.to_str());
+        let _ = fs::remove_file(&path);
+        assert!(result.is_err());
+    }
 }

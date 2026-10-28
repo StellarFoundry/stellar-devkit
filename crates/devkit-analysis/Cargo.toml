@@ -1,0 +1,13 @@
+[package]
+name = "devkit-analysis"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Deterministic structural security checks and SARIF output for Soroban WASM."
+
+[dependencies]
+devkit-contract.workspace = true
+serde.workspace = true
+serde_json.workspace = true

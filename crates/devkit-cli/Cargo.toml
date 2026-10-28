@@ -17,3 +17,7 @@ devkit-xdr.workspace = true
 devkit-rpc.workspace = true
 clap.workspace = true
 serde_json.workspace = true
+
+devkit-contract.workspace = true
+devkit-analysis.workspace = true
+devkit-config.workspace = true

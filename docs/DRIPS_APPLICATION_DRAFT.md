@@ -1,67 +1,56 @@
 # Drips Application Draft
 
-Factual draft answers. Nothing here guarantees approval, points, or payout, and
-no prior program participation, funding, community size, or contributor activity
-is claimed.
+This is a factual draft for review before any application is submitted. It does not guarantee acceptance, points, funding, or payout. Claims below distinguish the current open PR branch from features already merged to `main`.
 
 ## Project description
 
-StellarFoundry DevKit is a developer infrastructure toolkit for Stellar and
-Soroban. It provides bounded XDR/SCVal/transaction/event decoding with
-structured output, a typed RPC protocol layer with a deterministic mock
-transport, endpoint security validation, and a CLI (`stellar-foundry`). It
-composes with official crates rather than reimplementing them, works fully
-offline, and never requires AI.
+StellarFoundry DevKit is a Rust developer toolkit for Stellar and Soroban. Its current implementation provides bounded decoding of `ScVal`, `TransactionEnvelope`, and `ContractEvent` XDR; Stellar strkey classification; RPC endpoint validation; a typed RPC protocol layer with deterministic mock transport; and a CLI named `stellar-foundry`.
 
-## Stellar ecosystem relevance
+The implementation branch also adds bounded HTTP JSON-RPC transport, non-executing WASM inspection, bounded decoding of contractspecv0 XDR entries, deterministic structural findings, SARIF 2.1.0 serialization and a manual code-scanning upload workflow, strict TOML configuration wired into `rpc-health`, and release/readiness workflows. These changes are still under review until PR #133 merges.
 
-The toolkit depends on official Stellar crates (`stellar-xdr`,
-`stellar-strkey`) and targets Stellar/Soroban workflows directly. It complements
-`stellar-cli` and the official RPC client instead of duplicating them, and it
-serves developers building on Stellar.
+## Problem and ecosystem relevance
 
-## Planned issues
+Stellar developers often need to inspect XDR values, contract artifacts, events, and RPC behavior during development and testing. DevKit centralizes several of these workflows behind reusable Rust APIs and a CLI, with an emphasis on bounded handling of untrusted inputs, deterministic tests, and structured output.
 
-119 issues across core, RPC, XDR/SCVal, transactions, events, contract
-inspection, testing, security, CLI, configuration, GitHub/SARIF, performance,
-observability, release, and documentation. Complexity: 7 trivial, 84 medium,
-28 high. See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md) and
-[DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md). Most issues are not yet
-implemented; the working foundation is described in
-[PROJECT_STATUS.md](PROJECT_STATUS.md).
+The project composes with ecosystem crates such as `stellar-xdr` and `stellar-strkey`. It is intended to complement official Stellar tooling, not replace the official CLI or RPC client.
+
+## Current implementation and evidence
+
+- Repository: [StellarFoundry/stellar-devkit](https://github.com/StellarFoundry/stellar-devkit)
+- Combined implementation and hardening PR: [PR #133](https://github.com/StellarFoundry/stellar-devkit/pull/133)
+- Security/CI hardening PR: [PR #127](https://github.com/StellarFoundry/stellar-devkit/pull/127)
+- Latest combined CI run: [CI run #40679489331](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40679489331)
+
+The combined CI run passed formatting, Clippy, Linux, Windows, macOS, and Rust 1.91.0 MSRV tests: [CI run #40680053061](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053061). The regenerated lockfile includes the new transport and WASM-parser dependencies, and the RustSec audit passed: [audit run #40680053077](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053077).
+
+## Current limitations
+
+- `contractspecv0` entries are decoded with the official Stellar XDR types into XDR-JSON definitions, variant names, and best-effort names; a normalized ABI schema remains future work.
+- Security-analysis rules are structural heuristics, not a comprehensive vulnerability detector.
+- SARIF can be uploaded using the manual workflow when a repository-relative WASM artifact exists and code-scanning permissions are available.
+- RPC configuration is wired into `rpc-health`; other commands do not consume RPC settings.
+- The implementation PRs remain open. Do not state that all proposed features are already available on `main`.
 
 ## Contributor opportunities
 
-Small, well-scoped `good first issue` tasks (completions, exit-code tests,
-Dependabot) through medium features (typed RPC models, config system) to high
-work (live transport, fuzzing, SSRF hardening, SARIF, release automation).
+The issue backlog documents potential work across RPC, XDR/SCVal, contract inspection, testing, security, CLI, configuration, SARIF, performance, observability, release engineering, and documentation. Backlog issues are proposed work, not completed functionality. Check current issue states and assignment requirements before describing specific issues as available.
 
-## Supporting links
+See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md), [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md), and [DRIPS_READINESS.md](DRIPS_READINESS.md).
 
-- Repository: <https://github.com/StellarFoundry/stellar-devkit>
-- Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Ecosystem research: [ECOSYSTEM_RESEARCH.md](ECOSYSTEM_RESEARCH.md)
+## Supporting documentation
 
-## Current project status
+- [Architecture](ARCHITECTURE.md)
+- [Ecosystem research](ECOSYSTEM_RESEARCH.md)
+- [Project status](PROJECT_STATUS.md)
+- [Testing guide](TESTING.md)
+- [Release checklist](RELEASE_CHECKLIST.md)
+- [Contributing through Drips Wave](WAVE.md)
 
-Early. Working foundation plus RPC protocol layer with CI on Linux/Windows/macOS.
-See [PROJECT_STATUS.md](PROJECT_STATUS.md). Live RPC and higher-level analysis are
-not implemented.
+## Final verification before submission
 
-## Maintainer experience
+- Confirm the latest combined CI remains green after final documentation updates.
+- Confirm the RustSec audit passes against the committed lockfile.
+- Verify the current Drips Wave program's application process, eligibility, required evidence, and deadlines with the program maintainers.
+- Replace this draft only with verified facts from the final repository state; do not claim approval, funding, user traction, or contributor activity without evidence.
 
-Maintained under the StellarFoundry organization by the account `Ayinkx01`.
-StellarFoundry is not claimed to be independent of its maintainer; it is
-maintained by `Ayinkx01`.
-
-## Technical roadmap
-
-Twelve phases from foundation through release; see [ROADMAP.md](ROADMAP.md).
-
-## Honesty statement
-
-- No approval, payout, or contributor activity is guaranteed.
-- The issue set is smaller than 125; we do not inflate complexity to reach a
-  target.
-- Metrics such as stars, contributors, and funding are not claimed unless
-  verified.
+No application has been submitted by this draft.

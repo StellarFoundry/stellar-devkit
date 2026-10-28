@@ -1,0 +1,41 @@
+name: Upload contract analysis to GitHub code scanning
+
+on:
+  workflow_dispatch:
+    inputs:
+      wasm_path:
+        description: Repository-relative path to a Soroban contract WASM artifact
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+      - name: Validate artifact path
+        env:
+          WASM_PATH: ${{ inputs.wasm_path }}
+        shell: bash
+        run: |
+          case "$WASM_PATH" in
+            ""|/*|..|../*|*/../*|*/..) echo "wasm_path must be a repository-relative path without parent traversal" >&2; exit 2 ;;
+          esac
+          test -f "$WASM_PATH" || { echo "WASM artifact not found in repository" >&2; exit 2; }
+      - name: Generate SARIF report
+        env:
+          WASM_PATH: ${{ inputs.wasm_path }}
+        run: cargo run --locked --bin stellar-foundry -- --format sarif analyze-wasm "$WASM_PATH" > results.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3
+        with:
+          sarif_file: results.sarif
+          category: stellar-foundry-contract-analysis

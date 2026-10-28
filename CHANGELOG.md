@@ -9,30 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Workspace with `devkit-core`, `devkit-xdr`, and `devkit-cli`.
-- `devkit-core`: `DevkitError`, `Network` profiles with canonical passphrases,
-  `OutputFormat`.
-- `devkit-xdr`: decode base64 `ScVal`, `TransactionEnvelope`, and
-  `ContractEvent` to JSON with bounded reading; classify Stellar strkeys.
-- `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`,
-  `event`, with terminal and JSON output and stable exit codes.
-- `devkit-rpc`: typed Stellar RPC protocol layer with an injectable `Transport`,
-  a deterministic `MockTransport`, validated `Endpoint` (https only; loopback
-  `http`; no embedded credentials), typed `Health` / `NetworkInfo` /
-  `LatestLedger`, `getEvents` and `getFeeStats` passthrough, and a retry policy
-  that retries only transport failures.
-- CLI: `endpoint <URL>` validates an RPC endpoint against the security policy.
-- Documentation: ecosystem research, architecture, getting started, CLI
-  reference, project status, roadmap.
-- CI: format, clippy, and tests on Linux, Windows, and macOS.
-- Tooling: `tools/changelog.py` generates reviewable release sections from
-  Conventional Commits; a dry-run workflow runs on demand and on release.
-- Benchmark: `cargo run --release -p devkit-xdr --example mem_profile` reports
-  peak and current memory per decode input size (see `docs/MEMORY.md`).
-- Fuzzing: `fuzz/` cargo-fuzz targets for XDR/SCVal decoding, exercised by a
-  weekly bounded scheduled workflow (see `docs/TESTING.md`).
-- Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
-  pull-request and issue templates.
+- `devkit-contract`: bounded, non-executing WASM validation and structural
+  metadata for imports, exports, and custom sections.
+- `devkit-analysis`: deterministic structural findings with stable rule IDs
+  and SARIF 2.1.0 serialization.
+- `devkit-config`: strict TOML configuration parsing, timeout validation,
+  environment overrides, and static diagnostic events.
+- `devkit-rpc`: bounded HTTP JSON-RPC transport with timeout, redirects
+  disabled, response-size limits, response validation, and structured errors.
+- CLI commands `inspect-wasm`, `analyze-wasm`, and `rpc-health`.
+- `rpc-health` now consumes bounded TOML configuration, timeout settings, and environment overrides; endpoint precedence is explicit in the CLI reference.
+- Release-validation workflow, release checklist, Drips readiness checklist, and manual SARIF upload workflow for GitHub code scanning.
+- RustSec dependency auditing and declared Rust 1.91 workspace MSRV in PR #127.
+- Malformed-XDR regression corpus and bounded-input hardening.
+- CI: formatting, Clippy, and Linux, Windows, and macOS tests.
 
 ### Fixed
 
@@ -40,3 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Limits::none()`. A crafted XDR length prefix can no longer request an
   unbounded allocation (memory-exhaustion denial of service); such inputs are
   rejected as a structured decode error. Found by the `decode_scval` fuzz target.
+
+### Limitations
+
+- These changes are on open pull-request branches and are not all merged to
+  `main`.
+- `contractspecv0` XDR entries are decoded into official XDR-JSON definitions
+  with a variant kind and best-effort name; a normalized ABI schema remains future work.
+- Analysis findings are structural heuristics, not a comprehensive
+  vulnerability detector.
+- SARIF upload requires manual workflow dispatch, a repository-relative WASM
+  artifact, and GitHub code-scanning permissions.
+- The configuration API is currently wired into `rpc-health`; other commands do not consume RPC configuration because they do not need it.
