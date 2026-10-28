@@ -13,8 +13,8 @@ typed RPC protocol layer with deterministic mocks and a bounded HTTP transport;
 non-executing WASM inspection; deterministic structural findings with SARIF 2.1.0
 output; strict TOML configuration; and a CLI named `stellar-foundry`.
 
-The implementation is merged into `main`. There is no tagged release or crates.io
-publication yet.
+The implementation is merged into `main`. `v0.1.0` is released with prebuilt
+Linux, macOS, and Windows binaries; crates.io publication is still pending.
 
 ## Problem and ecosystem relevance
 
@@ -89,8 +89,10 @@ available.
   artifact exists and code-scanning permissions are available.
 - RPC configuration is wired into `rpc-health`; other commands do not consume
   RPC settings.
-- No tagged release, release binaries, or crates.io publication exists yet.
-- External adoption is limited; no external contributor has merged a PR yet.
+- crates.io publication is still pending; install from the GitHub Release or
+  build from source.
+- External adoption is limited; no independent external contributor has merged a
+  PR yet.
 
 ## Supporting documentation
 

@@ -10,4 +10,5 @@ Before publishing a version:
 6. Confirm the lockfile is regenerated and committed after dependency changes.
 7. Review the generated SARIF against the SARIF 2.1.0 schema.
 8. Verify artifacts and checksums before publishing; do not include credentials or local configuration.
-9. State known limitations in the release notes. Structural analysis findings are heuristics and do not prove a vulnerability.
+9. Push the `v*.*.*` tag and confirm the `Release` workflow uploaded the Linux, macOS, and Windows archives plus SHA256 checksums.
+10. State known limitations in the release notes. Structural analysis findings are heuristics and do not prove a vulnerability.

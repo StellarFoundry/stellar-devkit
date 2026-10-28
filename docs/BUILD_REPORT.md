@@ -68,7 +68,12 @@ read or logged.
 
 ## Release status
 
-No releases yet. No tagged release, binaries, or crates.io publication.
+`v0.1.0` is tagged and published with Linux x86_64, macOS arm64, and Windows
+x86_64 archives plus SHA256 checksums:
+
+<https://github.com/StellarFoundry/stellar-devkit/releases/tag/v0.1.0>
+
+crates.io publication is still pending.
 
 ## Issue backlog
 
@@ -89,7 +94,8 @@ See [DRIPS_READINESS.md](DRIPS_READINESS.md),
 
 ## Known limitations
 
-- No tagged release, release binaries, or crates.io publication.
+- crates.io publication is still pending; use the GitHub Release or build from
+  source.
 - `contractspecv0` output is XDR-JSON with best-effort names, not a normalized
   ABI.
 - Analysis rules are structural heuristics, not a vulnerability proof.

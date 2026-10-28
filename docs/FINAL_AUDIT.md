@@ -26,8 +26,9 @@ Audit date: 2026-10-28. Commit: `aec759c`.
 | Fuzzing | Verified | `fuzz/fuzz_targets/*`; scheduled fuzz workflow |
 | Performance measured | Partial | Memory measurement example; benchmarks pending |
 | Composite GitHub Action | Pending | Tracked as an issue; only manual SARIF upload exists |
-| Release binaries / crates.io | Pending | No tag, no binaries, no crates.io package |
-| External contributors | Pending | No external contributor has merged a PR yet |
+| Tagged release + binaries | Verified | `v0.1.0` with Linux/macOS/Windows archives and SHA256 checksums |
+| crates.io publication | Pending | No crates.io package yet |
+| External contributors | Pending | No independent external contributor has merged a PR yet |
 
 ## Notes
 
