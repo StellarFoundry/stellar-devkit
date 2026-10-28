@@ -6,9 +6,9 @@
 
 **Default branch:** `main`
 
-**Status note:** The capabilities below include work on open pull-request branches. They are not all merged into `main`. See PRs [#127](https://github.com/StellarFoundry/stellar-devkit/pull/127) and [#133](https://github.com/StellarFoundry/stellar-devkit/pull/133).
+**Status note:** The capabilities below are on an open pull-request branch and are not all merged into `main`. PR #133 includes PR #127's security-hardening head as a second parent for combined validation. Both PRs remain open; PR #127 is unmerged.
 
-## Implemented in the current code / feature branch
+## Implemented in the combined feature branch
 
 - `devkit-core`: structured errors, network profiles, output formats.
 - `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and `ContractEvent`; strkey classification; malformed-input regression fixtures.
@@ -17,16 +17,15 @@
 - `devkit-contract`: bounded, non-executing WASM validation and import/export/custom-section metadata.
 - `devkit-analysis`: deterministic structural findings with stable rule IDs and SARIF 2.1.0 serialization.
 - `devkit-config`: strict TOML parsing, timeout validation, environment overrides, and static diagnostics.
-- CI: formatting, Clippy, and tests on Linux, Windows, and macOS; Rust 1.91 MSRV job, scheduled fuzz smoke tests, and RustSec dependency audit.
-- Release preparation: release-validation workflow, release checklist, implementation-capabilities documentation, and updated Drips readiness checklist.
+- CI: pinned actions, locked dependency resolution, formatting, Clippy, Linux/Windows/macOS tests, and Rust 1.91.0 MSRV tests.
+- Security: RustSec dependency audit workflow and bounded malformed-XDR regression corpus.
+- Release preparation: release-validation workflow, release checklist, implementation-capabilities documentation, updated changelog, and Drips readiness checklist.
 
 ## Verified CI status
 
-- The pre-integration PR #133 head passed formatting, Clippy, and Linux, Windows, and macOS tests.
-- The pre-integration PR #127 head passed its recorded CI jobs and RustSec audit.
-- The combined merge commit must pass a fresh CI run before the integration is considered validated.
+The combined branch's latest CI run at `173a9468b4c7ad9ad44ee95c0211a800f3525352` passed all six jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. A fresh RustSec audit against the regenerated lockfile is still in progress.
 
-## Remaining limitations and integration work
+## Remaining limitations
 
 - `contractspecv0` is detected and sized but individual XDR specification entries are not yet decoded into typed function/struct/enum metadata.
 - Security-analysis rules are structural heuristics, not a comprehensive vulnerability engine.
