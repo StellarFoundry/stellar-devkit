@@ -295,7 +295,14 @@ fn read_wasm(path: &str) -> Result<Vec<u8>, CliError> {
         )
     })?;
     if bytes.len() > devkit_contract::MAX_WASM_BYTES {
-        return Err(CliError::new(EXIT_ERROR, "invalid_input", format!("WASM exceeds the {}-byte limit", devkit_contract::MAX_WASM_BYTES)));
+        return Err(CliError::new(
+            EXIT_ERROR,
+            "invalid_input",
+            format!(
+                "WASM exceeds the {}-byte limit",
+                devkit_contract::MAX_WASM_BYTES
+            ),
+        ));
     }
     Ok(bytes)
 }
