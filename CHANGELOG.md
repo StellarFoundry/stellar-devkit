@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `devkit-rpc`: detect HTTP 429 rate-limit responses, honor numeric
+  `Retry-After` delays within a configurable cumulative cap (60 seconds by
+  default), and return a clear `DevkitError::RateLimited` when the cap would be
+  exceeded.
+
 ## [0.1.0] - 2026-10-28
 
 First tagged release. Prebuilt binaries for Linux x86_64, macOS arm64, and

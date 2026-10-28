@@ -5,6 +5,8 @@
 //! dependency graph. It provides the shared error type, network profiles, and
 //! output format selection.
 
+use std::time::Duration;
+
 use serde::{Deserialize, Serialize};
 
 /// The CLI binary name.
@@ -31,6 +33,14 @@ pub enum DevkitError {
     /// An I/O operation failed.
     #[error("I/O error: {0}")]
     Io(String),
+    /// The RPC endpoint rate limited the request.
+    #[error("rate limited: {message}")]
+    RateLimited {
+        /// What happened, including any backoff decision.
+        message: String,
+        /// The delay the endpoint asked for via `Retry-After`, when provided.
+        retry_after: Option<Duration>,
+    },
 }
 
 impl DevkitError {
@@ -42,6 +52,22 @@ impl DevkitError {
     /// Builds an invalid-input error.
     pub fn invalid(cause: impl std::fmt::Display) -> Self {
         DevkitError::InvalidInput(cause.to_string())
+    }
+
+    /// Builds a rate-limit error with an optional `Retry-After` delay.
+    pub fn rate_limited(message: impl Into<String>, retry_after: Option<Duration>) -> Self {
+        DevkitError::RateLimited {
+            message: message.into(),
+            retry_after,
+        }
+    }
+
+    /// The `Retry-After` delay carried by a rate-limit error, if any.
+    pub fn retry_after(&self) -> Option<Duration> {
+        match self {
+            DevkitError::RateLimited { retry_after, .. } => *retry_after,
+            _ => None,
+        }
     }
 }
 
@@ -169,5 +195,13 @@ mod tests {
     fn devkit_error_from_display() {
         let err = DevkitError::decode("bad base64");
         assert!(err.to_string().contains("bad base64"));
+    }
+
+    #[test]
+    fn rate_limit_errors_preserve_retry_after() {
+        let err = DevkitError::rate_limited("HTTP 429", Some(Duration::from_secs(5)));
+        assert!(err.to_string().contains("rate limited"));
+        assert_eq!(err.retry_after(), Some(Duration::from_secs(5)));
+        assert_eq!(DevkitError::decode("x").retry_after(), None);
     }
 }
