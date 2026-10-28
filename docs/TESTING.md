@@ -13,6 +13,24 @@ cargo test --all
 Unit and integration tests live next to the code (`#[cfg(test)]` modules) and in
 `tests/`. Decoding changes must include malformed-input tests. The shared `fixtures/malformed/` corpus contains small, named samples for truncated XDR, invalid discriminants, empty input, and an overlong length prefix. `crates/devkit-xdr/tests/malformed_corpus.rs` runs each fixture through its intended decoder and requires a structured `DevkitError::Decode`; an unexpected successful decode or panic fails the test.
 
+## Cross-platform and endianness tests
+
+CI runs the suite on Linux, macOS, and Windows. The following tests pin behavior
+that otherwise differs between hosts:
+
+- `crates/devkit-xdr/tests/endianness.rs` asserts XDR's big-endian wire format
+  with explicit byte sequences (`ScVal::U32`, `ScVal::I32`, and `ScVal::I64`),
+  round-trips them, and checks that base64/JSON output is host-independent.
+- `crates/devkit-core/tests/cross_platform.rs` asserts that native and
+  forward-slash paths produce the same components, that `.` components are
+  removed, and that parsers accept CRLF-terminated input.
+- `crates/devkit-cli/tests/path_normalization.rs` runs `inspect-wasm` with a
+  native path, a forward-slash path, and a path containing `..`, and requires
+  byte-identical JSON output.
+
+Use explicit byte arrays rather than values derived from the host when testing
+encodings, and compare path *components* rather than rendered separator strings.
+
 ## Fuzzing
 
 Fuzz targets live in the standalone `fuzz/` crate (it is not part of the main
