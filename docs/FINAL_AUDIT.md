@@ -9,7 +9,7 @@ Audit date: 2026-10-28. Commit: `aec759c`.
 | Item | Status | Evidence |
 | ---- | ------ | -------- |
 | Build succeeds | Verified | `cargo build` |
-| Tests pass | Verified | `cargo test --locked --workspace --all-features` (51 tests); post-merge CI |
+| Tests pass | Verified | `cargo test --locked --workspace --all-features` (43 tests); post-merge CI |
 | Lint passes | Verified | `cargo clippy --locked --all-targets --all-features -- -D warnings` |
 | Formatting passes | Verified | `cargo fmt --all -- --check` |
 | CI passes | Verified | CI run 40690141880 on Linux/Windows/macOS |

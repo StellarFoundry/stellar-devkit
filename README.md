@@ -20,9 +20,8 @@ The core works fully **offline** and never requires AI.
 
 - `devkit-core` — shared errors, network profiles, output format.
 - `devkit-xdr` — decode `ScVal`, `TransactionEnvelope`, and `ContractEvent` from
-  base64 XDR into a versioned JSON document (`schema_version` 1.0) with an
-  opt-in `raw_xdr` echo; classify Stellar strkeys; bounded malformed-input
-  handling. See [docs/XDR.md](docs/XDR.md) and [docs/SCVAL.md](docs/SCVAL.md).
+  base64 XDR into JSON; classify Stellar strkeys; bounded malformed-input
+  handling.
 - `devkit-rpc` — endpoint validation, typed protocol layer, deterministic mock
   transport, retry policy, and a bounded HTTP JSON-RPC transport.
 - `devkit-contract` — non-executing WASM validation, import/export/custom-section
@@ -125,8 +124,6 @@ WASM module, emits SARIF, and optionally checks testnet RPC health. See
 - [Architecture](docs/ARCHITECTURE.md)
 - [Getting started](docs/GETTING_STARTED.md)
 - [CLI reference](docs/CLI.md)
-- [XDR JSON schema](docs/XDR.md)
-- [SCVal JSON schema](docs/SCVAL.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Implemented capabilities](docs/IMPLEMENTED_CAPABILITIES.md)
 - [Testnet demo](demo/README.md)

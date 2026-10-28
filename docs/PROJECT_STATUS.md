@@ -14,8 +14,7 @@ The merge commit is `aec759c`. CI and the RustSec audit are green on `main`.
 
 - `devkit-core`: structured errors, network profiles, output formats.
 - `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and
-  `ContractEvent` into a schema-versioned JSON document (1.0) with an opt-in raw
-  XDR echo; strkey classification; malformed-input regression fixtures.
+  `ContractEvent`; strkey classification; malformed-input regression fixtures.
 - `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`,
   `event`, `endpoint`, `inspect-wasm`, `analyze-wasm`, and `rpc-health`;
   terminal/JSON output, SARIF output for analysis, and exit codes 0/2/3.

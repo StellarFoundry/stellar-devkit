@@ -43,13 +43,12 @@ $env:SKIP_NETWORK = "1"; pwsh demo/run-demo.ps1
 ## Expected output (abridged)
 
 ```json
-{"kind":"scval","schema_version":"1.0","value":{"i128":"100"}}
+{"kind":"scval","value":{"i128":"100"}}
 ```
 
 ```json
 {
   "kind": "transaction_envelope",
-  "schema_version": "1.0",
   "value": {
     "tx": {
       "tx": {
