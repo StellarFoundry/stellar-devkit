@@ -105,6 +105,7 @@ mod tests {
             custom_sections: vec![],
             has_contract_spec: false,
             contract_spec_bytes: 0,
+            contract_spec_entries: vec![],
         };
         let findings = analyze(&report);
         assert!(findings
