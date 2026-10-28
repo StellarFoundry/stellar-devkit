@@ -82,8 +82,25 @@ Design rules:
   timeout and redirects disabled.
 - Typed models cover `getHealth`, `getNetwork`, and `getLatestLedger`. Other RPC
   methods return raw JSON until they are modeled.
-- `RetryPolicy` retries retryable transport failures. It does not yet implement
-  exponential backoff or jitter.
+- `RetryPolicy` retries transport failures and rate-limit responses. It does not
+  yet implement exponential backoff or jitter for transport failures.
+
+### Rate limits
+
+`HttpTransport` detects HTTP `429 Too Many Requests` and returns a structured
+`DevkitError::RateLimited` instead of a generic I/O error. The error carries the
+`Retry-After` delay when the endpoint supplies one in seconds.
+
+`Client` retries rate-limit responses only while the delay fits inside the
+policy's cumulative cap (`RetryPolicy::max_rate_limit_wait`, 60 seconds by
+default). A missing or non-numeric `Retry-After` falls back to a 1-second
+backoff. If the requested wait — or the sum of waits for one call — would exceed
+the cap, the client returns a clear rate-limit error immediately and never
+sleeps past the cap. `RetryPolicy::with_max_rate_limit_wait` lowers or raises the
+cap for a caller; a zero cap turns waiting off.
+
+The sleep is synchronous and bounded. Callers that cannot block should use a
+custom transport and handle `DevkitError::RateLimited` themselves.
 
 ## Contract inspection
 

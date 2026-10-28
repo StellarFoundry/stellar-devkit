@@ -52,7 +52,8 @@ constructs `HttpTransport`.
 - Normalized ABI schema for every `contractspecv0` entry type.
 - Typed models for `getLedgerEntries`, `getTransaction(s)`, `getFeeStats`, and
   paginated `getEvents`.
-- Exponential backoff with jitter, cancellation, and `Retry-After` handling.
+- Exponential backoff with jitter and cancellation for transport failures.
+  (`Retry-After` handling for HTTP 429 is implemented.)
 - Composite GitHub Action, baseline scanning, and SBOM/attestations.
 - Tagged release, release binaries, and crates.io publication.
 - Caching, persistence, and structured logging beyond static diagnostics.

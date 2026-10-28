@@ -27,6 +27,12 @@ use url::Url;
 const MAX_RPC_RESPONSE_BYTES: usize = 4 * 1024 * 1024;
 const MAX_RPC_RESPONSE_DEPTH: usize = 64;
 
+/// Fallback backoff when a rate-limit response has no usable `Retry-After`.
+const DEFAULT_RATE_LIMIT_BACKOFF: Duration = Duration::from_secs(1);
+
+/// Default cap on the total time a single call may spend waiting out limits.
+const DEFAULT_MAX_RATE_LIMIT_WAIT: Duration = Duration::from_secs(60);
+
 /// A validated Stellar RPC endpoint.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Endpoint {
@@ -128,9 +134,12 @@ impl MockTransport {
 
     /// Queues a transport failure.
     pub fn push_err(&self, message: impl Into<String>) {
-        self.responses
-            .borrow_mut()
-            .push_back(Err(DevkitError::Io(message.into())));
+        self.push_error(DevkitError::Io(message.into()));
+    }
+
+    /// Queues an arbitrary error, including a mocked rate-limit response.
+    pub fn push_error(&self, error: DevkitError) {
+        self.responses.borrow_mut().push_back(Err(error));
     }
 
     /// Returns the recorded `(method, params)` calls.
@@ -211,6 +220,17 @@ impl Transport for HttpTransport {
             .send()
             .map_err(|error| DevkitError::Io(format!("RPC HTTP request failed: {error}")))?;
         let status = response.status();
+        if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
+            let retry_after = response
+                .headers()
+                .get(reqwest::header::RETRY_AFTER)
+                .and_then(|value| value.to_str().ok())
+                .and_then(parse_retry_after);
+            return Err(DevkitError::rate_limited(
+                "RPC endpoint returned HTTP 429 Too Many Requests",
+                retry_after,
+            ));
+        }
         let mut body = Vec::new();
         response
             .take((MAX_RPC_RESPONSE_BYTES + 1) as u64)
@@ -376,6 +396,15 @@ fn response_too_large() -> DevkitError {
         "RPC response exceeds the {MAX_RPC_RESPONSE_BYTES}-byte limit"
     ))
 }
+
+/// Parses a `Retry-After` header value in seconds.
+///
+/// The HTTP-date form is not parsed; callers fall back to a small bounded
+/// backoff instead of guessing.
+fn parse_retry_after(value: &str) -> Option<Duration> {
+    value.trim().parse::<u64>().ok().map(Duration::from_secs)
+}
+
 /// A typed RPC client over an injected [`Transport`].
 pub struct Client<T: Transport> {
     transport: T,
@@ -398,8 +427,13 @@ impl<T: Transport> Client<T> {
     }
 
     /// Calls a method, retrying retryable transport errors.
+    ///
+    /// Rate-limit responses are retried only when the requested `Retry-After`
+    /// fits inside the policy's total wait cap. The client never sleeps past
+    /// that cap: it returns a clear rate-limit error instead.
     fn call(&self, method: &str, params: Value) -> Result<Value, DevkitError> {
         let mut attempt = 0;
+        let mut waited = Duration::ZERO;
         loop {
             match self.transport.call(method, params.clone()) {
                 Ok(value) => {
@@ -407,11 +441,27 @@ impl<T: Transport> Client<T> {
                     return Ok(value);
                 }
                 Err(error) => {
-                    if self.retry.should_retry(attempt, &error) {
-                        attempt += 1;
-                        continue;
+                    if !self.retry.should_retry(attempt, &error) {
+                        return Err(error);
                     }
-                    return Err(error);
+                    if let Some(delay) = self.retry.rate_limit_delay(&error) {
+                        let total = waited.saturating_add(delay);
+                        if total > self.retry.max_rate_limit_wait {
+                            return Err(DevkitError::rate_limited(
+                                format!(
+                                    "RPC rate-limit backoff of {}s would exceed the {}s cap",
+                                    delay.as_secs(),
+                                    self.retry.max_rate_limit_wait.as_secs()
+                                ),
+                                Some(delay),
+                            ));
+                        }
+                        waited = total;
+                        if !delay.is_zero() {
+                            std::thread::sleep(delay);
+                        }
+                    }
+                    attempt += 1;
                 }
             }
         }
@@ -457,26 +507,55 @@ impl<T: Transport> Client<T> {
 pub struct RetryPolicy {
     /// Maximum number of retries (not counting the first attempt).
     pub max_retries: u32,
+    /// Maximum total time a single call may spend waiting out rate limits.
+    pub max_rate_limit_wait: Duration,
 }
 
 impl Default for RetryPolicy {
     fn default() -> Self {
-        RetryPolicy { max_retries: 2 }
+        RetryPolicy {
+            max_retries: 2,
+            max_rate_limit_wait: DEFAULT_MAX_RATE_LIMIT_WAIT,
+        }
     }
 }
 
 impl RetryPolicy {
-    /// Creates a policy with `max_retries`.
+    /// Creates a policy with `max_retries` and the default wait cap.
     pub fn new(max_retries: u32) -> Self {
-        RetryPolicy { max_retries }
+        RetryPolicy {
+            max_retries,
+            ..RetryPolicy::default()
+        }
+    }
+
+    /// Sets the cap on cumulative rate-limit waiting for a single call.
+    #[must_use]
+    pub fn with_max_rate_limit_wait(mut self, max_rate_limit_wait: Duration) -> Self {
+        self.max_rate_limit_wait = max_rate_limit_wait;
+        self
     }
 
     /// Returns true when another attempt should be made.
     ///
-    /// Only transport-level failures are retryable. Decode and input errors are
-    /// deterministic and are never retried.
+    /// Transport failures and rate-limit responses are retryable. Decode and
+    /// input errors are deterministic and are never retried.
     pub fn should_retry(&self, attempts_made: u32, error: &DevkitError) -> bool {
-        attempts_made < self.max_retries && matches!(error, DevkitError::Io(_))
+        attempts_made < self.max_retries
+            && matches!(error, DevkitError::Io(_) | DevkitError::RateLimited { .. })
+    }
+
+    /// The delay to apply before retrying a rate-limit response.
+    ///
+    /// Uses `Retry-After` when present and a small bounded fallback otherwise.
+    /// Returns `None` for errors that are not rate limits.
+    pub fn rate_limit_delay(&self, error: &DevkitError) -> Option<Duration> {
+        match error {
+            DevkitError::RateLimited { retry_after, .. } => {
+                Some(retry_after.unwrap_or(DEFAULT_RATE_LIMIT_BACKOFF))
+            }
+            _ => None,
+        }
     }
 }
 
@@ -602,7 +681,7 @@ mod tests {
     }
 
     #[test]
-    fn retry_policy_retries_only_io_errors() {
+    fn retry_policy_retries_transport_errors_but_not_decode_errors() {
         let policy = RetryPolicy::new(2);
         assert!(policy.should_retry(0, &DevkitError::Io("timeout".into())));
         assert!(policy.should_retry(1, &DevkitError::Io("timeout".into())));
@@ -617,5 +696,103 @@ mod tests {
         transport.push_ok(json!({"status": "healthy"}));
         let client = Client::new(transport).with_retry(RetryPolicy::new(1));
         assert_eq!(client.health().unwrap().status, "healthy");
+    }
+
+    #[test]
+    fn parses_retry_after_seconds_and_ignores_http_dates() {
+        assert_eq!(parse_retry_after("0"), Some(Duration::ZERO));
+        assert_eq!(parse_retry_after(" 120 "), Some(Duration::from_secs(120)));
+        assert_eq!(parse_retry_after("Wed, 21 Oct 2015 07:28:00 GMT"), None);
+        assert_eq!(parse_retry_after("-1"), None);
+        assert_eq!(parse_retry_after("later"), None);
+    }
+
+    #[test]
+    fn http_transport_detects_429_and_carries_retry_after() {
+        use std::io::Write;
+        use std::net::TcpListener;
+
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test server");
+        let address = listener.local_addr().expect("test server address");
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept request");
+            let mut request = [0u8; 1024];
+            let _ = stream.read(&mut request);
+            let body = "{}";
+            let response = format!(
+                "HTTP/1.1 429 Too Many Requests\r\nRetry-After: 7\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream
+                .write_all(response.as_bytes())
+                .expect("write response");
+        });
+
+        let endpoint = Endpoint::parse(&format!("http://{address}")).expect("loopback endpoint");
+        let transport = HttpTransport::with_default_timeout(endpoint).expect("transport");
+        let error = transport.call("getHealth", json!({})).unwrap_err();
+        assert!(
+            matches!(
+                &error,
+                DevkitError::RateLimited {
+                    retry_after: Some(retry_after),
+                    ..
+                } if *retry_after == Duration::from_secs(7)
+            ),
+            "unexpected error: {error}"
+        );
+        server.join().expect("test server exits");
+    }
+
+    #[test]
+    fn retry_policy_retries_rate_limits_and_uses_bounded_default_backoff() {
+        let policy = RetryPolicy::new(2);
+        let limited = DevkitError::rate_limited("429", None);
+        assert!(policy.should_retry(0, &limited));
+        assert!(policy.should_retry(1, &limited));
+        assert!(!policy.should_retry(2, &limited));
+        assert_eq!(
+            policy.rate_limit_delay(&limited),
+            Some(DEFAULT_RATE_LIMIT_BACKOFF)
+        );
+        assert_eq!(policy.rate_limit_delay(&DevkitError::decode("bad")), None);
+    }
+
+    #[test]
+    fn client_retries_a_mocked_rate_limit_response_then_succeeds() {
+        let transport = MockTransport::default();
+        transport.push_error(DevkitError::rate_limited("HTTP 429", Some(Duration::ZERO)));
+        transport.push_ok(json!({"status": "healthy"}));
+        let client = Client::new(transport).with_retry(RetryPolicy::new(1));
+        assert_eq!(client.health().unwrap().status, "healthy");
+    }
+
+    #[test]
+    fn retry_after_beyond_the_cap_returns_a_clear_error_without_waiting() {
+        let transport = MockTransport::default();
+        transport.push_error(DevkitError::rate_limited(
+            "HTTP 429",
+            Some(Duration::from_secs(120)),
+        ));
+        let policy = RetryPolicy::new(2).with_max_rate_limit_wait(Duration::from_secs(30));
+        let error = Client::new(transport)
+            .with_retry(policy)
+            .health()
+            .unwrap_err();
+        assert!(matches!(error, DevkitError::RateLimited { .. }));
+        assert!(error.to_string().contains("cap"));
+        assert!(error.to_string().contains("120s"));
+    }
+
+    #[test]
+    fn client_returns_the_rate_limit_error_when_retries_are_exhausted() {
+        let transport = MockTransport::default();
+        transport.push_error(DevkitError::rate_limited("HTTP 429", Some(Duration::ZERO)));
+        let error = Client::new(transport)
+            .with_retry(RetryPolicy::new(0))
+            .health()
+            .unwrap_err();
+        assert!(matches!(error, DevkitError::RateLimited { .. }));
+        assert_eq!(error.retry_after(), Some(Duration::ZERO));
     }
 }

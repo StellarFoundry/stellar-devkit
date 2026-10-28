@@ -428,6 +428,7 @@ fn runtime(error: devkit_core::DevkitError) -> CliError {
         DevkitError::InvalidInput(_) => "invalid_input",
         DevkitError::Config(_) => "configuration",
         DevkitError::Io(_) => "io",
+        DevkitError::RateLimited { .. } => "rate_limited",
     };
     CliError::new(EXIT_ERROR, category, error.to_string())
 }

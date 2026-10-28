@@ -81,7 +81,7 @@ When `--format json` is selected, errors are written to stderr as one JSON objec
 }
 ```
 
-The category is one of `usage`, `decode`, `encode`, `invalid_input`, `configuration`, `io`, or `internal`. Process exit codes remain unchanged (2 for usage errors and 3 for runtime errors). Command-line parse errors use a generic JSON message so supplied argument text is not echoed into logs. Successful output remains on stdout; error JSON is on stderr.
+The category is one of `usage`, `decode`, `encode`, `invalid_input`, `configuration`, `io`, `rate_limited`, or `internal`. Process exit codes remain unchanged (2 for usage errors and 3 for runtime errors). Command-line parse errors use a generic JSON message so supplied argument text is not echoed into logs. Successful output remains on stdout; error JSON is on stderr.
 
 ## Output stability
 
