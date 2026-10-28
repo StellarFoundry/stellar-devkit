@@ -72,6 +72,24 @@ stellar-foundry rpc-health https://soroban-testnet.stellar.org
 Decode commands accept `-` to read one bounded value from stdin. Exit codes:
 `0` success, `2` usage error, `3` runtime/decode error.
 
+## Demo
+
+Run a short tour with captured Soroban testnet data:
+
+```bash
+bash demo/run-demo.sh
+```
+
+On Windows:
+
+```powershell
+pwsh demo/run-demo.ps1
+```
+
+The demo decodes a real testnet transaction and event value, inspects a minimal
+WASM module, emits SARIF, and optionally checks testnet RPC health. See
+[demo/README.md](demo/README.md).
+
 ## Scope and limitations
 
 - `contractspecv0` entries are decoded into XDR-JSON definitions with a variant
@@ -111,6 +129,8 @@ Decode commands accept `-` to read one bounded value from stdin. Exit codes:
 - [SCVal JSON schema](docs/SCVAL.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Implemented capabilities](docs/IMPLEMENTED_CAPABILITIES.md)
+- [Testnet demo](demo/README.md)
+- [Publishing to crates.io](docs/PUBLISHING.md)
 - [Memory measurement](docs/MEMORY.md)
 - [Testing guide](docs/TESTING.md)
 - [Project status](docs/PROJECT_STATUS.md)

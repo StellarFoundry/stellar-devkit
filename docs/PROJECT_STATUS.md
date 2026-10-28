@@ -55,7 +55,9 @@ checksums:
 
 - https://github.com/StellarFoundry/stellar-devkit/releases/tag/v0.1.0
 
-crates.io publication remains outstanding.
+crates.io publication is prepared but not executed: the `Publish` workflow and
+`docs/PUBLISHING.md` are ready, and the repository needs a
+`CARGO_REGISTRY_TOKEN` secret.
 
 ## Remaining limitations
 

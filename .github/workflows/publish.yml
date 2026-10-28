@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Package only; do not publish to crates.io"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish crates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          workspaces: "."
+
+      - name: Package workspace
+        run: cargo package --workspace --no-verify
+
+      - name: Publish crates in dependency order
+        if: inputs.dry_run == false
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          publish() {
+            echo "Publishing $1"
+            cargo publish -p "$1" --locked
+            # Give the crates.io index time to expose the new version before
+            # dependent crates resolve it.
+            sleep 30
+          }
+
+          publish devkit-core
+          publish devkit-config
+          publish devkit-xdr
+          publish devkit-rpc
+          publish devkit-contract
+          publish devkit-analysis
+          publish devkit-cli

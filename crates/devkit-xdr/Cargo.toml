@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-xdr"
+keywords = ["stellar", "soroban", "xdr", "scval"]
+categories = ["development-tools", "encoding"]
 description = "XDR, SCVal, transaction, and event inspection utilities for StellarFoundry DevKit."
 
 [dependencies]

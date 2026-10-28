@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-cli"
+keywords = ["stellar", "soroban", "cli", "developer-tools"]
+categories = ["command-line-utilities", "development-tools"]
 description = "The `stellar-foundry` command-line interface."
 
 [[bin]]

@@ -74,7 +74,8 @@ exact scope.
 - RPC config is wired into `rpc-health`; other commands do not use RPC settings.
   Endpoint precedence is command line, then environment, then config file.
 - `v0.1.0` is released with Linux, macOS, and Windows binaries and checksums;
-  crates.io publication is still pending.
+  crates.io publication is prepared but still pending (needs a
+  `CARGO_REGISTRY_TOKEN` secret).
 - The project has limited external adoption: no external contributors have merged
   PRs yet, and the repository is new. Do not present issue counts or labels as
   evidence of traction.

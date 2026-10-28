@@ -5,6 +5,10 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/devkit-config"
+keywords = ["stellar", "soroban", "config", "toml"]
+categories = ["config", "development-tools"]
 description = "Validated configuration and secret-safe diagnostics for StellarFoundry DevKit."
 
 [dependencies]
