@@ -9,6 +9,7 @@ use std::{
     fs,
     io::{self, IsTerminal, Read},
     process::ExitCode,
+    time::Duration,
 };
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -40,6 +41,10 @@ impl From<FormatArg> for OutputFormat {
 #[derive(Debug, Parser)]
 #[command(name = "stellar-foundry", version, about, long_about = None)]
 struct Cli {
+    /// Optional TOML configuration file (used by commands that support configuration).
+    #[arg(long, global = true)]
+    config: Option<String>,
+
     /// Output format.
     #[arg(long, value_enum, default_value_t = FormatArg::Terminal, global = true)]
     format: FormatArg,
@@ -84,7 +89,10 @@ enum Command {
     /// Run structural checks against a WASM module; --format sarif emits SARIF 2.1.0.
     AnalyzeWasm { path: String },
     /// Query getHealth from an explicitly supplied Stellar RPC endpoint.
-    RpcHealth { endpoint: String },
+    RpcHealth {
+        /// RPC endpoint; overrides config file and environment.
+        endpoint: Option<String>,
+    },
 }
 
 #[derive(Debug)]
@@ -165,6 +173,7 @@ fn print_json_error(category: &str, message: &str) {
 
 fn run(cli: Cli) -> Result<u8, CliError> {
     let format: OutputFormat = cli.format.into();
+    let config_path = cli.config.clone();
     match cli.command {
         Command::Version => {
             println!("{TOOL_NAME} {VERSION}");
@@ -223,9 +232,24 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             Ok(EXIT_SUCCESS)
         }
         Command::RpcHealth { endpoint } => {
+            let mut config = load_config(config_path.as_deref())?;
+            config.apply_environment().map_err(|message| {
+                CliError::new(EXIT_USAGE, "configuration", message)
+            })?;
+            let endpoint = endpoint.or(config.rpc_url).ok_or_else(|| {
+                CliError::new(
+                    EXIT_USAGE,
+                    "configuration",
+                    "provide an RPC endpoint argument, set rpc_url in the config file, or set STELLAR_FOUNDRY_RPC_URL",
+                )
+            })?;
+            devkit_config::diagnostic(config.verbose, "rpc_health_start");
             let endpoint = devkit_rpc::Endpoint::parse(&endpoint).map_err(runtime)?;
-            let transport =
-                devkit_rpc::HttpTransport::with_default_timeout(endpoint).map_err(runtime)?;
+            let transport = devkit_rpc::HttpTransport::new(
+                endpoint,
+                Duration::from_millis(config.timeout_ms),
+            )
+            .map_err(runtime)?;
             let health = devkit_rpc::Client::new(transport)
                 .health()
                 .map_err(runtime)?;
@@ -267,6 +291,44 @@ fn doctor(format: OutputFormat) {
         "rpc_transport": "bounded HTTP JSON-RPC and deterministic mock",
     });
     print_value(format, &report);
+}
+
+/// Load optional TOML configuration with a strict size limit. Environment
+/// overrides are applied by the command so unrelated CLI commands remain
+/// independent of RPC-specific environment variables.
+fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
+    const MAX_CONFIG_BYTES: u64 = 1024 * 1024;
+    let mut config = if let Some(path) = path {
+        let metadata = fs::metadata(path).map_err(|error| {
+            CliError::new(EXIT_ERROR, "io", format!("failed to inspect config file: {error}"))
+        })?;
+        if metadata.len() > MAX_CONFIG_BYTES {
+            return Err(CliError::new(
+                EXIT_USAGE,
+                "configuration",
+                "config file exceeds the 1048576-byte limit",
+            ));
+        }
+        let content = fs::read_to_string(path).map_err(|error| {
+            CliError::new(EXIT_ERROR, "io", format!("failed to read config file: {error}"))
+        })?;
+        if content.len() as u64 > MAX_CONFIG_BYTES {
+            return Err(CliError::new(
+                EXIT_USAGE,
+                "configuration",
+                "config file exceeds the 1048576-byte limit",
+            ));
+        }
+        devkit_config::Config::parse_toml(&content).map_err(|message| {
+            CliError::new(EXIT_USAGE, "configuration", message)
+        })?
+    } else {
+        devkit_config::Config::default()
+    };
+    config.validate().map_err(|message| {
+        CliError::new(EXIT_USAGE, "configuration", message)
+    })?;
+    Ok(config)
 }
 
 fn read_wasm(path: &str) -> Result<Vec<u8>, CliError> {
