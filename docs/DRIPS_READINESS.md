@@ -19,20 +19,20 @@ The combined branch for PR #133 includes the feature work and the security-harde
 - Bounded base64 decoding for `ScVal`, `TransactionEnvelope`, and `ContractEvent`, with structured errors and malformed-input regression fixtures.
 - RPC endpoint policy validation and a typed RPC client with deterministic mock transport.
 - HTTP JSON-RPC transport with timeout, redirects disabled, a response-size cap, response validation, and structured errors.
-- Non-executing WASM validation and structural metadata for imports, exports, and custom sections.
+- Non-executing WASM validation, structural metadata, and bounded decoding of `contractspecv0` XDR entries into entry kind/name/definition records.
 - Deterministic structural analysis findings with stable rule IDs and SARIF 2.1.0 serialization.
 - Strict TOML configuration parsing, timeout validation, environment overrides, and static diagnostic events.
-- CLI commands for WASM inspection, WASM analysis, and explicit RPC health checks.
+- CLI commands for WASM inspection, WASM analysis, and RPC health checks using optional TOML config, environment overrides, and a validated timeout.
 - Pinned CI actions, locked dependency resolution, a dedicated Rust 1.91.0 MSRV job, RustSec dependency auditing, release-validation workflow, and release checklist.
 
 See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), [CHANGELOG.md](../CHANGELOG.md), and [PR #133](https://github.com/StellarFoundry/stellar-devkit/pull/133) for exact scope.
 
 ## Known limitations (must be represented honestly)
 
-- The `contractspecv0` section is detected and measured; individual XDR entries are not yet decoded into typed function, struct, and enum metadata.
+- Contract-spec entries are decoded into XDR-JSON definitions with a variant kind and best-effort name; a normalized, fully typed ABI schema is still future work.
 - Analysis rules are structural heuristics, not a complete vulnerability detector and not proof of malicious intent.
-- SARIF serialization exists, but automatic upload to GitHub code scanning is not configured.
-- The configuration library parses TOML and environment overrides, but it is not yet fully wired into all CLI commands; `rpc-health` currently accepts an explicit endpoint argument.
+- SARIF upload is available through a manual workflow dispatch and requires a WASM artifact in the repository plus code-scanning permissions.
+- RPC config is wired into `rpc-health`; other commands do not use RPC settings. Endpoint precedence is command-line, then environment, then config file.
 - No claim is made here that the project has published crates or release binaries, has a large user base, or is approved for a Wave.
 
 ## Contributor workflow
@@ -56,7 +56,7 @@ See [SECURITY.md](../SECURITY.md), [TESTING.md](TESTING.md), and [RELEASE_CHECKL
 - [x] The combined implementation passed CI on Linux, Windows, and macOS, plus formatting, Clippy, and Rust 1.91.0 MSRV tests.
 - [x] The RustSec audit passed against the regenerated lockfile on the combined head.
 - [x] User-facing documentation, project status, and changelog distinguish proposed work from work merged to `main`.
-- [ ] The application is finalized with links to the combined PR, CI results, and concrete completed work.
+- [ ] The application is finalized with links to the combined PR, latest CI/audit results, and concrete completed work.
 - [ ] A maintainer/program administrator has confirmed the applicable Wave application process and eligibility.
 
 The combined CI and RustSec audit are green. Passing checks do not establish maintainer approval or Drips eligibility; verify the program-specific requirements before submitting.
