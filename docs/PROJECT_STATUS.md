@@ -1,75 +1,54 @@
 # Project Status
 
-**Current phase:** Phase 1 — Foundation (in progress)
+**Current phase:** Foundation and developer-tooling implementation in review
 
 **Repository:** https://github.com/StellarFoundry/stellar-devkit
 
 **Default branch:** `main`
 
-## Completed
+**Status note:** The capabilities below include work on open pull-request branches. They are not all merged into `main`. See PRs [#127](https://github.com/StellarFoundry/stellar-devkit/pull/127) and [#133](https://github.com/StellarFoundry/stellar-devkit/pull/133).
 
-- Workspace: `devkit-core`, `devkit-xdr`, `devkit-cli`.
-- `devkit-core`: structured errors, network profiles (public/testnet/futurenet/
-  custom) with canonical passphrases, output format.
-- `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and
-  `ContractEvent` to JSON; strkey classification.
-- `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`,
-  `event`, `endpoint`; terminal/JSON output; exit codes 0/2/3.
-- `devkit-rpc`: typed RPC protocol layer with an injectable transport, a
-  deterministic mock, endpoint validation, typed health/network/latest-ledger
-  results, and a retry policy. **No live network transport yet.**
-- CI: fmt, clippy, tests on Linux/Windows/macOS.
-- Docs: ecosystem research, architecture, getting started, CLI, roadmap, this
-  file.
-- Governance: README, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, LICENSE,
-  CHANGELOG, PR/issue templates.
+## Implemented in the current code / feature branch
 
-## Not started (tracked as issues)
+- `devkit-core`: structured errors, network profiles, output formats.
+- `devkit-xdr`: bounded decoding of base64 `ScVal`, `TransactionEnvelope`, and `ContractEvent`; strkey classification; malformed-input regression fixtures.
+- `stellar-foundry` CLI: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`, `endpoint`, `inspect-wasm`, `analyze-wasm`, and `rpc-health`; terminal/JSON output, SARIF output for analysis, and exit codes 0/2/3.
+- `devkit-rpc`: typed RPC protocol layer, deterministic mock transport, endpoint validation, typed health/network/latest-ledger results, retry policy, and bounded HTTP JSON-RPC transport.
+- `devkit-contract`: bounded, non-executing WASM validation and import/export/custom-section metadata.
+- `devkit-analysis`: deterministic structural findings with stable rule IDs and SARIF 2.1.0 serialization.
+- `devkit-config`: strict TOML parsing, timeout validation, environment overrides, and static diagnostics.
+- CI: formatting, Clippy, and tests on Linux, Windows, and macOS; PR #127 also adds a RustSec dependency audit and declares Rust 1.91 as the workspace MSRV.
+- Release preparation: release-validation workflow, release checklist, implementation-capabilities documentation, and updated Drips readiness checklist.
 
-- RPC layer (integration with `stellar-rpc-client`, mock transport, diagnostics).
-- Configuration system and logging.
-- Fixtures and a mock network for deterministic tests.
-- Contract inspection (WASM metadata / spec).
-- Transaction and event analysis (resources, fees, auth, affected state).
-- Security analysis (malformed XDR, unsafe RPC configuration, SSRF policy).
-- SARIF output and GitHub Action.
-- Performance benchmarks and observability.
-- Release engineering (binaries, crates.io, release automation).
+## Verified CI status
 
-## Verified facts
+- PR #133 head `039e055a0fc3f2118eb891fd572025cfb2f10e90`: its recorded CI run passed formatting, Clippy, and Linux, Windows, and macOS tests.
+- PR #127 head `140e3a547db4665c8195e83a070ea1c1c639e63e`: its recorded CI jobs and RustSec audit passed.
+- These are separate branch runs. They do **not** establish that the combined changes pass after branch reconciliation.
 
-- `cargo build`, `cargo test`, `cargo clippy -D warnings`, `cargo fmt --check`
-  pass locally (run on 2026-09-22). Test count is reported in the build report.
-- CLI smoke test: real contract strkey classified as `contract`.
+## Remaining limitations and integration work
 
-## Known limitations
-
-- JSON shapes come from `stellar-xdr`'s serde representation and are **unstable**
-  until a curated, versioned schema is defined.
-- Decoding uses a permissive limit today; a stricter, configurable limit is
-  planned.
-- No network functionality exists; `doctor` states this explicitly.
-- No MSRV is pinned yet.
-- `devkit-core` has no configuration loader yet.
+- `contractspecv0` is detected and sized but individual XDR specification entries are not yet decoded into typed function/struct/enum metadata.
+- Security-analysis rules are structural heuristics, not a comprehensive vulnerability engine.
+- SARIF serialization is implemented; automatic GitHub code-scanning upload is not configured.
+- The configuration library exists, but it is not yet fully wired into every CLI command. `rpc-health` takes an explicit endpoint argument.
+- The two open PR branches diverge from the current base; combined integration and CI remain required before treating the work as ready for a Drips Wave appeal.
+- Do not describe unmerged work as already released or available from `main`.
 
 ## Security status
 
-- No network access, no secrets, bounded decoding, structured errors.
-- Fuzzing is planned, not yet implemented.
+- XDR and WASM inputs are bounded in the implemented paths.
+- The HTTP transport uses a finite timeout, disables redirects, bounds response bytes before parsing, and validates JSON-RPC responses.
+- Endpoint policy rejects embedded credentials and permits plaintext HTTP only for loopback.
+- Security claims should be limited to behavior demonstrated by code and tests; no system is claimed to be vulnerability-free.
 
 ## Contributor backlog
 
-- **119 open issues** after a quality audit (down from 121).
-- Audit result: **89 Drips-ready**, 24 blocked by dependency, 3 deferred, 3 needing
-  revision. See [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md).
-- Status labels `status/ready`, `status/blocked`, `status/deferred`, and
-  `status/needs-revision` are applied.
-- Manifest: [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md); prior audit:
-  [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md).
-- The backlog is a roadmap: most issues are **not implemented**.
+The issue backlog is a roadmap, not a list of completed features. Audit counts, labels, and issue descriptions must not be presented as proof that the corresponding work is implemented. See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md) and [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md).
 
 ## Drips documents
 
-- [DRIPS_READINESS.md](DRIPS_READINESS.md)
-- [DRIPS_APPLICATION_DRAFT.md](DRIPS_APPLICATION_DRAFT.md)
-- [DRIPS_ISSUE_AUDIT.md](DRIPS_ISSUE_AUDIT.md)
+- [Drips readiness checklist](DRIPS_READINESS.md)
+- [Drips application draft](DRIPS_APPLICATION_DRAFT.md)
+- [Issue audit](DRIPS_ISSUE_AUDIT.md)
+- [Contributing through Drips Wave](WAVE.md)
