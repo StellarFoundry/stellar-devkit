@@ -1,0 +1,43 @@
+name: Refresh Cargo lockfile
+
+on:
+  push:
+    branches:
+      - feat/complete-devkit-workstreams
+    paths:
+      - "Cargo.toml"
+      - "**/Cargo.toml"
+      - ".github/workflows/refresh-lockfile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-lockfile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+      - name: Regenerate lockfile
+        run: cargo generate-lockfile
+      - name: Commit lockfile if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- Cargo.lock; then
+            echo "Cargo.lock is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Cargo.lock
+          git commit -m "build: regenerate Cargo.lock"
+          git push
