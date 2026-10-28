@@ -1,123 +1,65 @@
 # Drips Readiness
 
-This document prepares the repository for a possible Drips Wave application. It
-contains **no guarantee** of approval, payout, contributor activity, or points.
+This document records the repository's current state for a possible Drips Wave application. It does not guarantee approval, funding, payout, contributor activity, or points.
 
 ## Project summary
 
-StellarFoundry DevKit is a developer infrastructure toolkit for Stellar and
-Soroban. It composes with official crates (`stellar-xdr`, `stellar-strkey`, and
-later `stellar-rpc-client`) instead of reimplementing them, and provides a
-workflow layer: decoding and inspection with structured output, a typed RPC
-protocol layer with deterministic mocks, fixtures, analysis, and a CLI.
+StellarFoundry DevKit is a Rust developer toolkit for Stellar and Soroban. It provides bounded XDR decoding, endpoint validation, a typed RPC protocol layer, WASM metadata inspection, deterministic structural findings, SARIF serialization, configuration parsing, and a CLI.
 
-## Problem solved
+## Problem and ecosystem fit
 
-Stellar developers repeatedly need to decode XDR/SCVal, inspect transactions and
-events, talk to RPC, and test those flows deterministically. That glue code is
-rebuilt per project. DevKit centralizes it with stable, testable interfaces and
-no AI dependency.
+Stellar developers routinely need to inspect XDR values, transactions, events, contract artifacts, and RPC behavior. DevKit aims to consolidate these workflows behind testable Rust APIs and command-line interfaces while composing with ecosystem crates such as `stellar-xdr` and `stellar-strkey`.
 
-## Why it belongs in the Stellar ecosystem
+The project complements official Stellar tooling; it should not claim to replace the official CLI or RPC client.
 
-- It targets Stellar and Soroban specifically and depends on official crates.
-- It does not duplicate `stellar-cli` or the official RPC client; it complements
-  them with workflow, testing, and analysis.
-- It is useful to the same developers the Stellar ecosystem funds.
+## Implementation status on the current feature branch
 
-## Current implementation status
+Implemented in the PR under review (not yet merged to `main`):
 
-- **Working:** workspace with `devkit-core`, `devkit-xdr`, `devkit-rpc`,
-  `devkit-cli`; bounded base64 decoding of `ScVal`/`TransactionEnvelope`/
-  `ContractEvent` to JSON; strkey classification; endpoint security validation;
-  typed RPC protocol layer with a deterministic mock transport; CLI with stable
-  exit codes.
-- **Not implemented:** live RPC transport, contract inspection, security
-  analysis, SARIF, GitHub Action, configuration, logging, benchmarks.
-- See [PROJECT_STATUS.md](PROJECT_STATUS.md).
+- Bounded base64 decoding for `ScVal`, `TransactionEnvelope`, and `ContractEvent`, with structured errors and malformed-input regression fixtures.
+- RPC endpoint policy validation and a typed RPC client with deterministic mock transport.
+- HTTP JSON-RPC transport with timeout, redirects disabled, a response-size cap, response validation, and structured errors.
+- Non-executing WASM validation and structural metadata for imports, exports, and custom sections.
+- Deterministic structural analysis findings with stable rule IDs and SARIF 2.1.0 serialization.
+- Strict TOML configuration parsing, timeout validation, environment overrides, and static diagnostic events.
+- CLI commands for WASM inspection, WASM analysis, and explicit RPC health checks.
+- CI for formatting, Clippy, and Linux/Windows/macOS tests; a RustSec dependency-audit workflow; release-validation workflow and release checklist.
+
+See [IMPLEMENTED_CAPABILITIES.md](IMPLEMENTED_CAPABILITIES.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), and the open pull requests for exact scope.
+
+## Known limitations (must be represented honestly)
+
+- The `contractspecv0` section is detected and measured; individual XDR entries are not yet decoded into typed function, struct, and enum metadata.
+- Analysis rules are structural heuristics, not a complete vulnerability detector and not proof of malicious intent.
+- SARIF serialization exists, but automatic upload to GitHub code scanning is not configured.
+- The configuration library parses TOML and environment overrides, but it is not yet fully wired into all CLI commands; `rpc-health` currently accepts an explicit endpoint argument.
+- The feature and hardening PR branches have passed their recorded CI runs individually, but a combined integration run is required after reconciling their divergent bases.
+- No claim is made here that the project has published crates or release binaries, has a large user base, or is approved for a Wave.
 
 ## Contributor workflow
 
 - Issues are labeled by `area/*`, `type/*`, `difficulty/*`, and `phase/*`.
-- `good first issue` marks small, well-scoped tasks.
-- Each issue states problem, why, context, scope, out-of-scope, guidance,
-  acceptance criteria, required tests, security considerations, documentation
-  requirements, dependencies, and a definition of done.
-- Contributors request assignment before starting; PRs use `Closes #<id>` and
-  run the local gate (fmt, clippy, tests).
+- Contributors request assignment before starting and follow each issue's scope and acceptance criteria.
+- PRs reference the relevant issue, include tests and documentation, and report commands and results truthfully.
+- The repository gate is `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings`, and `cargo test --workspace --all-features`. CI additionally exercises Linux, Windows, and macOS; release validation checks packaging.
 
-## Issue categories
+## Issue quality and backlog
 
-Core, RPC, XDR, SCVal, transactions, events, contract inspection, testing,
-security, CLI, configuration, GitHub, SARIF, observability, documentation,
-release. See [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md).
+The backlog audit and issue labels are documented in [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md) and [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md). Backlog issues are planned work, not completed features. Do not present issue count or labels as evidence that those features already exist.
 
-## Issue quality standards
+## Security and release process
 
-- No fabricated or duplicate issues; titles are unique and each is traceable to
-  real functionality or maintenance work.
-- Complexity is honest (`trivial`/`medium`/`high`); points are assigned in the
-  Drips dashboard.
+See [SECURITY.md](../SECURITY.md), [TESTING.md](TESTING.md), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). Security claims must correspond to implementation and tests; secrets, endpoint values, and payloads should not be written to logs.
 
-## Testing standards
+## Appeal readiness checklist
 
-- Unit tests for pure functions; malformed-input tests for every decoder;
-  fixture-based tests; property tests and fuzzing planned.
-- The local gate is `cargo fmt --check`, `cargo clippy -D warnings`,
-  `cargo test --all`.
+Before applying, confirm all of the following:
 
-## Documentation standards
+- [ ] Both pull requests have been reviewed against the current `main` base and their integration strategy is explicit.
+- [ ] A combined change set has passed required CI after reconciliation, including Linux, Windows, macOS, formatting, and Clippy.
+- [ ] The lockfile and dependency audit are consistent with the final manifest.
+- [ ] User-facing documentation, project status, and changelog accurately reflect what is merged versus still proposed.
+- [ ] The application describes concrete completed work, links to the actual PRs and tests, and distinguishes limitations from delivered functionality.
+- [ ] A maintainer/program administrator has confirmed the applicable Wave application process and eligibility.
 
-Every public feature is documented; `CHANGELOG.md` and `PROJECT_STATUS.md` are
-kept factual.
-
-## Maintainer responsiveness plan
-
-- Initial response to new issues and PRs within 48 hours during an active Wave.
-- Review decision within 72 hours of a reviewable PR.
-- Assign contributors promptly; unresolved issues roll over.
-
-## Security process
-
-See [SECURITY.md](../SECURITY.md). No network access by default; untrusted input
-is bounded and decoded with structured errors; every security claim is backed by
-implementation and tests.
-
-## Release process
-
-See [ROADMAP.md](ROADMAP.md) and the release issue. Semantic versioning,
-changelog, and (planned) cross-platform binaries.
-
-## Links
-
-- Repository: <https://github.com/StellarFoundry/stellar-devkit>
-- Backlog: [ISSUE_BACKLOG.md](ISSUE_BACKLOG.md)
-- Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Ecosystem research: [ECOSYSTEM_RESEARCH.md](ECOSYSTEM_RESEARCH.md)
-
-## Quality audit outcome
-
-Every open issue was audited against the Drips maintainer criteria. Results
-(see [DRIPS_ISSUE_QUALITY_AUDIT.md](DRIPS_ISSUE_QUALITY_AUDIT.md)):
-
-- **89 Drips-ready** issues (`status/ready`).
-- **24 blocked by dependency** (`status/blocked`) — not to be added to a Wave
-  until their dependency lands.
-- **3 deferred / future work** (`status/deferred`).
-- **3 needs revision** (`status/needs-revision`, clarified on the issue).
-- **1 duplicate removed**, **1 merged** (issue count reduced from 121 to 119).
-
-Complexity labels were not altered. Drips determines applicable points and
-budgets through its own system.
-
-## Known limitations
-
-- The backlog contains 119 open issues. Most are **not implemented**; the
-  project is early (foundation and RPC protocol layer only). See
-  [BUILD_REPORT.md](BUILD_REPORT.md).
-- No live RPC, no release binaries, no published crates.
-- Traction is minimal and is reported honestly.
-
-## Future roadmap
-
-See [ROADMAP.md](ROADMAP.md).
+Passing CI is necessary but does not by itself establish acceptance criteria, maintainer approval, or Drips eligibility. Do not submit an appeal until the integration and program-specific requirements are verified.
