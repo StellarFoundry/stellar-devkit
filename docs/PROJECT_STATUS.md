@@ -23,7 +23,7 @@
 
 ## Verified CI status
 
-The combined branch's latest CI run at `173a9468b4c7ad9ad44ee95c0211a800f3525352` passed all six jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. A fresh RustSec audit against the regenerated lockfile is still in progress.
+The integrated code branch has passed all six CI jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. A later documentation-only update is being revalidated by CI. The RustSec audit against the regenerated lockfile is still in progress.
 
 ## Remaining limitations
 
