@@ -6,6 +6,7 @@
 //! * `3` runtime error (decode failure, I/O)
 
 use std::{
+    fs,
     io::{self, IsTerminal, Read},
     process::ExitCode,
 };
@@ -23,13 +24,14 @@ const MAX_STDIN_BYTES: usize = 16 * 1024 * 1024;
 enum FormatArg {
     Terminal,
     Json,
+    Sarif,
 }
 
 impl From<FormatArg> for OutputFormat {
     fn from(value: FormatArg) -> Self {
         match value {
             FormatArg::Terminal => OutputFormat::Terminal,
-            FormatArg::Json => OutputFormat::Json,
+            FormatArg::Json | FormatArg::Sarif => OutputFormat::Json,
         }
     }
 }
@@ -77,6 +79,12 @@ enum Command {
         /// The endpoint URL to validate.
         url: String,
     },
+    /// Inspect a WASM module without executing it.
+    InspectWasm { path: String },
+    /// Run structural checks against a WASM module; --format sarif emits SARIF 2.1.0.
+    AnalyzeWasm { path: String },
+    /// Query getHealth from an explicitly supplied Stellar RPC endpoint.
+    RpcHealth { endpoint: String },
 }
 
 #[derive(Debug)]
@@ -191,6 +199,34 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             print_value(format, &xdr::summary("contract_event", &decoded));
             Ok(EXIT_SUCCESS)
         }
+        Command::InspectWasm { path } => {
+            let bytes = read_wasm(&path)?;
+            let report = devkit_contract::inspect_wasm(&bytes).map_err(runtime)?;
+            let value = serde_json::to_value(&report)
+                .map_err(|error| CliError::new(EXIT_ERROR, "internal", error.to_string()))?;
+            print_value(format, &value);
+            Ok(EXIT_SUCCESS)
+        }
+        Command::AnalyzeWasm { path } => {
+            let bytes = read_wasm(&path)?;
+            let report = devkit_contract::inspect_wasm(&bytes).map_err(runtime)?;
+            let findings = devkit_analysis::analyze(&report);
+            if cli.format == FormatArg::Sarif {
+                println!("{}", devkit_analysis::to_sarif(&findings, Some(&path)));
+            } else {
+                print_value(format, &serde_json::json!({ "findings": findings, "count": findings.len() }));
+            }
+            Ok(EXIT_SUCCESS)
+        }
+        Command::RpcHealth { endpoint } => {
+            let endpoint = devkit_rpc::Endpoint::parse(&endpoint).map_err(runtime)?;
+            let transport = devkit_rpc::HttpTransport::with_default_timeout(endpoint).map_err(runtime)?;
+            let health = devkit_rpc::Client::new(transport).health().map_err(runtime)?;
+            let value = serde_json::to_value(health)
+                .map_err(|error| CliError::new(EXIT_ERROR, "internal", error.to_string()))?;
+            print_value(format, &value);
+            Ok(EXIT_SUCCESS)
+        }
         Command::Endpoint { url } => {
             let endpoint = devkit_rpc::Endpoint::parse(&url).map_err(runtime)?;
             let report = serde_json::json!({
@@ -218,12 +254,24 @@ fn doctor(format: OutputFormat) {
     let report = serde_json::json!({
         "tool": TOOL_NAME,
         "version": VERSION,
-        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event", "endpoint_validation"],
+        "capabilities": ["strkey", "scval", "transaction_envelope", "contract_event", "endpoint_validation", "wasm_inspection", "wasm_analysis", "rpc_health"],
         "networks": networks,
-        "network_access": "none (offline decoding only)",
-        "rpc_transport": "mock only (no live transport yet)",
+        "network_access": "explicit only (rpc-health command)",
+        "rpc_transport": "bounded HTTP JSON-RPC and deterministic mock",
     });
     print_value(format, &report);
+}
+
+fn read_wasm(path: &str) -> Result<Vec<u8>, CliError> {
+    let metadata = fs::metadata(path).map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to inspect WASM file: {error}")))?;
+    if metadata.len() > devkit_contract::MAX_WASM_BYTES as u64 {
+        return Err(CliError::new(EXIT_ERROR, "invalid_input", format!("WASM exceeds the {}-byte limit", devkit_contract::MAX_WASM_BYTES)));
+    }
+    let bytes = fs::read(path).map_err(|error| CliError::new(EXIT_ERROR, "io", format!("failed to read WASM file: {error}")))?;
+    if bytes.len() > devkit_contract::MAX_WASM_BYTES {
+        return Err(CliError::new(EXIT_ERROR, "invalid_input", format!("WASM exceeds the {}-byte limit", devkit_contract::MAX_WASM_BYTES)));
+    }
+    Ok(bytes)
 }
 
 /// Resolve a decode argument, reading bounded UTF-8 input only when explicitly asked.
