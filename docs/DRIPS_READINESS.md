@@ -54,9 +54,9 @@ See [SECURITY.md](../SECURITY.md), [TESTING.md](TESTING.md), and [RELEASE_CHECKL
 
 - [x] Both PR heads are included in a combined review branch; PR #127 remains open and unmerged.
 - [x] The combined implementation passed CI on Linux, Windows, and macOS, plus formatting, Clippy, and Rust 1.91.0 MSRV tests.
-- [ ] The RustSec audit has passed against the regenerated lockfile on the final combined head.
+- [x] The RustSec audit passed against the regenerated lockfile on the combined head.
 - [x] User-facing documentation, project status, and changelog distinguish proposed work from work merged to `main`.
 - [ ] The application is finalized with links to the combined PR, CI results, and concrete completed work.
 - [ ] A maintainer/program administrator has confirmed the applicable Wave application process and eligibility.
 
-Passing CI is necessary but does not by itself establish maintainer approval or Drips eligibility. Do not submit an appeal until the final dependency audit and program-specific requirements are verified.
+The combined CI and RustSec audit are green. Passing checks do not establish maintainer approval or Drips eligibility; verify the program-specific requirements before submitting.

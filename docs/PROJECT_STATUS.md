@@ -23,7 +23,7 @@
 
 ## Verified CI status
 
-The integrated code branch has passed all six CI jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. A later documentation-only update is being revalidated by CI. The RustSec audit against the regenerated lockfile is still in progress.
+The final combined branch at `f3d2bc8dace0e4d4c0e77871c931cfb82ae87ddd` passed all six CI jobs: formatting, Clippy, Linux tests, Windows tests, macOS tests, and Rust 1.91.0 MSRV tests. The RustSec audit also completed successfully against the regenerated lockfile; see [audit run #40680053077](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053077).
 
 ## Remaining limitations
 

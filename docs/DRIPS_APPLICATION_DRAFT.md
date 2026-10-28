@@ -21,7 +21,7 @@ The project composes with ecosystem crates such as `stellar-xdr` and `stellar-st
 - Security/CI hardening PR: [PR #127](https://github.com/StellarFoundry/stellar-devkit/pull/127)
 - Latest combined CI run: [CI run #40679489331](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40679489331)
 
-The latest combined CI run passed formatting, Clippy, Linux, Windows, macOS, and Rust 1.91.0 MSRV tests. The regenerated lockfile includes the new transport and WASM-parser dependencies. The RustSec audit is being rerun against the combined branch; confirm its final result before submitting an application.
+The combined CI run passed formatting, Clippy, Linux, Windows, macOS, and Rust 1.91.0 MSRV tests: [CI run #40680053061](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053061). The regenerated lockfile includes the new transport and WASM-parser dependencies, and the RustSec audit passed: [audit run #40680053077](https://github.com/StellarFoundry/stellar-devkit/actions/runs/40680053077).
 
 ## Current limitations
 
