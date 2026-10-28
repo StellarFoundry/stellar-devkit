@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   disabled, response-size limits, response validation, and structured errors.
 - CLI commands `inspect-wasm`, `analyze-wasm`, and `rpc-health`.
 - `rpc-health` now consumes bounded TOML configuration, timeout settings, and environment overrides; endpoint precedence is explicit in the CLI reference.
-- Release-validation workflow, release checklist, and Drips readiness checklist.
+- Release-validation workflow, release checklist, Drips readiness checklist, and manual SARIF upload workflow for GitHub code scanning.
 - RustSec dependency auditing and declared Rust 1.91 workspace MSRV in PR #127.
 - Malformed-XDR regression corpus and bounded-input hardening.
 - CI: formatting, Clippy, and Linux, Windows, and macOS tests.
