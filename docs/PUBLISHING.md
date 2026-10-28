@@ -15,7 +15,10 @@ page before running the workflow.
 
 ## Dry run
 
-Run the **Publish** workflow with `dry_run = true` (the default). It executes:
+Run the **Publish** workflow from `main` (the `v0.1.0` tag predates the
+workflow) with `dry_run = true` (the default). The crate source matches
+`v0.1.0`; later commits on `main` are documentation, demo, and packaging
+metadata changes. It executes:
 
 ```bash
 cargo package --workspace --no-verify
