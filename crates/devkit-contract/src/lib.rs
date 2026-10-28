@@ -39,9 +39,12 @@ pub fn inspect_wasm(bytes: &[u8]) -> Result<ContractReport, DevkitError> {
         return Err(DevkitError::invalid("WASM input is empty"));
     }
     if bytes.len() > MAX_WASM_BYTES {
-        return Err(DevkitError::invalid(format!("WASM exceeds the {MAX_WASM_BYTES}-byte limit")));
+        return Err(DevkitError::invalid(format!(
+            "WASM exceeds the {MAX_WASM_BYTES}-byte limit"
+        )));
     }
-    Validator::new().validate_all(bytes)
+    Validator::new()
+        .validate_all(bytes)
         .map_err(|error| DevkitError::decode(format!("invalid WASM module: {error}")))?;
     let mut report = ContractReport {
         wasm_bytes: bytes.len(),
@@ -99,7 +102,10 @@ mod tests {
     #[test]
     fn rejects_oversized_input_before_parsing() {
         let input = vec![0; MAX_WASM_BYTES + 1];
-        assert!(inspect_wasm(&input).unwrap_err().to_string().contains("limit"));
+        assert!(inspect_wasm(&input)
+            .unwrap_err()
+            .to_string()
+            .contains("limit"));
     }
 
     #[test]
