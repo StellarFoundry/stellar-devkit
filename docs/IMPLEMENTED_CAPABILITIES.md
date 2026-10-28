@@ -8,4 +8,4 @@ This branch adds reusable library APIs for the remaining developer-tooling works
 - **Configuration/diagnostics:** `devkit_config::Config` parses strict TOML, validates timeouts, and supports environment overrides. Verbose diagnostics accept static event names and avoid printing endpoints or payloads.
 - **Release readiness:** the release-validation workflow runs tests, formatting/lint checks, and package validation on version tags.
 
-These APIs are library-first in this change; CLI subcommands and GitHub code-scanning upload automation remain follow-up integration work. No WASM is executed and no network request is made unless a caller explicitly constructs and uses the HTTP transport.
+CLI commands are available as `inspect-wasm`, `analyze-wasm`, and `rpc-health`. GitHub code-scanning upload automation and decoding each XDR contract spec entry remain follow-up integration work. No WASM is executed and no network request is made unless a caller explicitly constructs and uses the HTTP transport.
