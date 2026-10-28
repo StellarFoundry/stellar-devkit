@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default), and return a clear `DevkitError::RateLimited` when the cap would be
   exceeded.
 
+## [Unreleased]
+
+### Added
+
+- Cross-platform tests for XDR big-endian encoding, path separator handling,
+  `..` normalization, and CRLF input across the CI operating systems. See
+  `docs/TESTING.md`.
+
 ## [0.1.0] - 2026-10-28
 
 First tagged release. Prebuilt binaries for Linux x86_64, macOS arm64, and
