@@ -233,9 +233,9 @@ fn run(cli: Cli) -> Result<u8, CliError> {
         }
         Command::RpcHealth { endpoint } => {
             let mut config = load_config(config_path.as_deref())?;
-            config.apply_environment().map_err(|message| {
-                CliError::new(EXIT_USAGE, "configuration", message)
-            })?;
+            config
+                .apply_environment()
+                .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?;
             let endpoint = endpoint.or(config.rpc_url).ok_or_else(|| {
                 CliError::new(
                     EXIT_USAGE,
@@ -245,11 +245,9 @@ fn run(cli: Cli) -> Result<u8, CliError> {
             })?;
             devkit_config::diagnostic(config.verbose, "rpc_health_start");
             let endpoint = devkit_rpc::Endpoint::parse(&endpoint).map_err(runtime)?;
-            let transport = devkit_rpc::HttpTransport::new(
-                endpoint,
-                Duration::from_millis(config.timeout_ms),
-            )
-            .map_err(runtime)?;
+            let transport =
+                devkit_rpc::HttpTransport::new(endpoint, Duration::from_millis(config.timeout_ms))
+                    .map_err(runtime)?;
             let health = devkit_rpc::Client::new(transport)
                 .health()
                 .map_err(runtime)?;
@@ -300,7 +298,11 @@ fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
     const MAX_CONFIG_BYTES: u64 = 1024 * 1024;
     let mut config = if let Some(path) = path {
         let metadata = fs::metadata(path).map_err(|error| {
-            CliError::new(EXIT_ERROR, "io", format!("failed to inspect config file: {error}"))
+            CliError::new(
+                EXIT_ERROR,
+                "io",
+                format!("failed to inspect config file: {error}"),
+            )
         })?;
         if metadata.len() > MAX_CONFIG_BYTES {
             return Err(CliError::new(
@@ -310,7 +312,11 @@ fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
             ));
         }
         let content = fs::read_to_string(path).map_err(|error| {
-            CliError::new(EXIT_ERROR, "io", format!("failed to read config file: {error}"))
+            CliError::new(
+                EXIT_ERROR,
+                "io",
+                format!("failed to read config file: {error}"),
+            )
         })?;
         if content.len() as u64 > MAX_CONFIG_BYTES {
             return Err(CliError::new(
@@ -319,15 +325,14 @@ fn load_config(path: Option<&str>) -> Result<devkit_config::Config, CliError> {
                 "config file exceeds the 1048576-byte limit",
             ));
         }
-        devkit_config::Config::parse_toml(&content).map_err(|message| {
-            CliError::new(EXIT_USAGE, "configuration", message)
-        })?
+        devkit_config::Config::parse_toml(&content)
+            .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?
     } else {
         devkit_config::Config::default()
     };
-    config.validate().map_err(|message| {
-        CliError::new(EXIT_USAGE, "configuration", message)
-    })?;
+    config
+        .validate()
+        .map_err(|message| CliError::new(EXIT_USAGE, "configuration", message))?;
     Ok(config)
 }
 
@@ -427,7 +432,6 @@ fn runtime(error: devkit_core::DevkitError) -> CliError {
     CliError::new(EXIT_ERROR, category, error.to_string())
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -445,7 +449,10 @@ mod tests {
         .expect("write temporary config");
         let config = load_config(path.to_str()).expect("valid config");
         let _ = fs::remove_file(&path);
-        assert_eq!(config.rpc_url.as_deref(), Some("https://soroban-testnet.stellar.org"));
+        assert_eq!(
+            config.rpc_url.as_deref(),
+            Some("https://soroban-testnet.stellar.org")
+        );
         assert_eq!(config.timeout_ms, 2500);
         assert!(config.verbose);
     }
