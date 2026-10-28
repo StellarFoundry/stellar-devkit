@@ -5,9 +5,12 @@ from __future__ import annotations
 
 import glob
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+REPO = "StellarFoundry/stellar-devkit"
 OUT = ROOT / "docs" / "DRIPS_ISSUE_AUDIT.md"
 
 COMPLEXITY_RANK = {"trivial": 0, "medium": 1, "high": 2}
@@ -31,13 +34,29 @@ def area(labels: list[str]) -> str:
     return "area/other"
 
 
+def open_numbers() -> dict[str, int]:
+    result = subprocess.run(
+        ["gh", "issue", "list", "--repo", REPO, "--state", "open", "--limit", "2000",
+         "--json", "number,title"],
+        capture_output=True, text=True, encoding="utf-8",
+    )
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+        sys.exit(1)
+    return {i["title"]: i["number"] for i in json.loads(result.stdout or "[]")}
+
+
 def main() -> int:
+    numbers = open_numbers()
     issues = []
     for path in sorted(glob.glob(str(ROOT / "tools" / "backlog" / "issues_*.json"))):
         for issue in json.loads(Path(path).read_text(encoding="utf-8")):
             if issue["title"] in CLOSED_TITLES:
                 continue
-            issues.append(issue)
+            number = numbers.get(issue["title"])
+            if number is None:
+                continue
+            issues.append({**issue, "number": number})
 
     issues.sort(key=lambda i: (COMPLEXITY_RANK.get(i.get("complexity", "medium"), 1), i["title"]))
 
@@ -64,7 +83,7 @@ def main() -> int:
         "| # | Title | Area | Complexity | Dependencies | Acceptance | Tests | Security |",
         "| - | ----- | ---- | ---------- | ------------ | ---------- | ----- | -------- |",
     ]
-    for idx, issue in enumerate(issues, start=1):
+    for issue in issues:
         labels = issue.get("labels", [])
         complexity = issue.get("complexity", "medium")
         has_acceptance = "yes" if issue.get("acceptance") else "no"
@@ -72,7 +91,7 @@ def main() -> int:
         has_security = "yes" if issue.get("security") else "no"
         deps = issue.get("deps", "None.")
         lines.append(
-            f"| {idx} | {issue['title']} | {area(labels).removeprefix('area/')} | "
+            f"| #{issue['number']} | {issue['title']} | {area(labels).removeprefix('area/')} | "
             f"{complexity} | {deps} | {has_acceptance} | {has_tests} | {has_security} |"
         )
 

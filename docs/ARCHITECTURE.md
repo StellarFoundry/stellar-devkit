@@ -4,7 +4,7 @@
 
 Provide a coherent developer infrastructure layer for Stellar and Soroban that
 composes with official tooling instead of duplicating it. The core is
-deterministic, works fully offline, and never requires AI.
+deterministic, works fully offline by default, and never requires AI.
 
 ## Non-goals
 
@@ -12,26 +12,35 @@ deterministic, works fully offline, and never requires AI.
 - Replacing `stellar-cli` for build/deploy/invoke.
 - Proving contracts secure.
 - Network access by default.
+- Source-level vulnerability detection (that belongs to
+  `soroban-security-scanner`).
 
 ## Crate map
 
 ```
 crates/
-  devkit-core   # errors, network profiles, output format (no I/O, no Stellar deps)
-  devkit-xdr    # XDR / SCVal / transaction / event inspection (wraps stellar-xdr)
-  devkit-cli    # the `stellar-foundry` binary (clap)
+  devkit-core      # errors, network profiles, output format (no I/O, no Stellar deps)
+  devkit-xdr       # XDR / SCVal / transaction / event inspection (wraps stellar-xdr)
+  devkit-rpc       # endpoint policy, typed protocol models, mock + HTTP transport
+  devkit-contract  # non-executing WASM validation and contractspec metadata
+  devkit-analysis  # deterministic structural findings and SARIF serialization
+  devkit-config    # strict TOML configuration and secret-safe diagnostics
+  devkit-cli       # the `stellar-foundry` binary (clap)
 ```
 
-Dependency direction is strictly one way:
+Dependency direction is one way:
 
 ```
 devkit-cli ──▶ devkit-xdr ──▶ devkit-core
-                     │
-                     └──▶ stellar-xdr, stellar-strkey
+     │              └──▶ stellar-xdr, stellar-strkey
+     ├──▶ devkit-rpc ──▶ devkit-core
+     ├──▶ devkit-contract ──▶ devkit-core, stellar-xdr, wasmparser
+     ├──▶ devkit-analysis ──▶ devkit-core, devkit-contract
+     └──▶ devkit-config ──▶ (serde, toml)
 ```
 
 `devkit-core` has no Stellar dependencies so it can be reused cheaply and tested
-in isolation. `devkit-xdr` is the only crate that touches XDR types.
+in isolation. Only `devkit-xdr` and `devkit-contract` touch XDR types.
 
 ## Core abstractions
 
@@ -54,42 +63,80 @@ in isolation. `devkit-xdr` is the only crate that touches XDR types.
 
 Design rules:
 
-- All decoding is bounded; `Limits::none()` is used with the understanding that
-  inputs are size-limited by callers, and a stricter limit can be threaded
-  through later (tracked as an issue).
+- All decoding is bounded. The decoder does not use `Limits::none()`.
 - Failures are structured, never panics. Malformed input is a first-class test
-  case.
+  case; `fixtures/malformed/` and `crates/devkit-xdr/tests/malformed_corpus.rs`
+  cover the regression corpus.
 - JSON is produced by `stellar-xdr`'s `serde` representation today. A curated,
   versioned schema is future work; until then the JSON shape is documented as
   **unstable**.
 
+## RPC architecture
+
+`devkit-rpc` separates protocol from transport:
+
+- `Endpoint` validates schemes, rejects embedded credentials, and permits
+  plaintext HTTP only for loopback hosts.
+- `Transport` is the injection point. `MockTransport` is deterministic and used
+  by tests; `HttpTransport` performs bounded JSON-RPC over reqwest with a finite
+  timeout and redirects disabled.
+- Typed models cover `getHealth`, `getNetwork`, and `getLatestLedger`. Other RPC
+  methods return raw JSON until they are modeled.
+- `RetryPolicy` retries retryable transport failures. It does not yet implement
+  exponential backoff or jitter.
+
+## Contract inspection
+
+`devkit-contract` never executes contract code. It validates the WASM container,
+reports imports, exports, and custom sections, and decodes `contractspecv0` as a
+bounded stream of official `ScSpecEntry` XDR values. Entry definitions are
+returned as XDR-JSON with a variant kind and best-effort name; a normalized ABI
+schema is future work.
+
+## Analysis and SARIF
+
+`devkit-analysis` emits deterministic findings with stable rule IDs and evidence,
+and serializes SARIF 2.1.0. The rules are structural heuristics, not a
+comprehensive vulnerability engine, and findings are not proof of malicious
+intent. SARIF upload is a manual workflow that requires a repository-relative
+WASM artifact and code-scanning permissions.
+
+## Configuration and diagnostics
+
+- `devkit-config` parses strict TOML, validates timeouts, applies environment
+  overrides, and emits static diagnostic event names. It never logs endpoint
+  values or payloads.
+- Configuration is wired into `rpc-health`. Other commands do not make network
+  requests, so they do not consume RPC settings.
+- No caching or persistence exists yet.
+
 ## CLI architecture
 
-`stellar-foundry` uses `clap` derive. Global `--format` selects output. Exit
-codes are stable: `0` success, `2` usage error, `3` runtime/decode error.
-Commands only exist if they do real work; `doctor` reports capabilities and
-explicitly states that network access is disabled.
+`stellar-foundry` uses `clap` derive. Global `--format` selects terminal, JSON,
+or SARIF output. Exit codes are stable: `0` success, `2` usage error, `3`
+runtime/decode error. Commands only exist if they do real work; `doctor` reports
+capabilities and states that network access is explicit and limited to
+`rpc-health`.
 
-## Configuration, logging, caching
-
-- Configuration and logging are not implemented yet; they are planned and
-  tracked as issues. `doctor` reports the current (empty) state honestly.
-- No caching or persistence exists yet.
+Commands: `version`, `doctor`, `strkey`, `scval`, `envelope`, `event`,
+`endpoint`, `inspect-wasm`, `analyze-wasm`, `rpc-health`.
 
 ## Security boundaries
 
-- **No network access** in the current implementation. Any future network
-  feature must be opt-in, allowlisted, time-limited, size-limited, and fail
-  closed.
-- Scanned/decoded input is **untrusted**: decoding is bounded and fuzzing is
-  planned.
+- **No network access by default.** The only networked command is `rpc-health`,
+  which requires an explicit endpoint (argument, environment, or config).
+- The HTTP transport uses a finite timeout, disables redirects, caps response
+  bytes before parsing, and validates JSON-RPC responses.
+- Scanned/decoded input is **untrusted**: decoding is bounded and fuzz targets
+  exist for `ScVal`, `TransactionEnvelope`, and `ContractEvent`.
 - No secrets are read, logged, or committed. `.gitignore` excludes `.env*`,
   keys, and PEM files.
+- WASM inspection is read-only and never executes contract code.
 
 ## Dependency strategy
 
-- Depend on official Stellar crates (`stellar-xdr`, `stellar-strkey`, and later
-  `stellar-rpc-client`) rather than reimplementing.
+- Depend on official Stellar crates (`stellar-xdr`, `stellar-strkey`) rather
+  than reimplementing.
 - Keep the dependency surface small; every new dependency must be justified.
 - Licenses must be compatible (Apache-2.0 for this project).
 
@@ -99,14 +146,22 @@ explicitly states that network access is disabled.
 - Rule/CLI exit codes and machine output are treated as API and documented.
 - The toolkit tracks current Stellar protocol crates (28.x line at the time of
   writing).
+- The workspace version is `0.1.0`; no tagged release exists yet.
 
 ## Testing architecture
 
 - Unit tests next to code for pure functions.
 - Round-trip tests construct XDR values, encode them, decode them, and assert
-  the result — no external fixtures required for correctness.
-- Fixture-based and fuzz testing are planned (issues) once the schema stabilizes.
+  the result.
+- Fixture-based regression tests cover malformed XDR.
+- Fuzz targets live in the standalone `fuzz/` crate and run in a scheduled
+  workflow.
 
 ## RPC response safety limits
 
-The RPC client rejects response values whose compact JSON representation would exceed 4 MiB or whose nesting exceeds 64 levels. Typed response models require their non-optional fields; schema failures return `DevkitError::Decode` and are not retried as transport failures. Unknown fields remain tolerated for forward compatibility with Stellar RPC additions. The current transport abstraction receives an already-parsed `serde_json::Value`, so these limits protect downstream processing but cannot cap memory used by a future transport while parsing raw bytes; a live transport must enforce the byte cap before parsing as well.
+The RPC layer rejects response values whose compact JSON representation would
+exceed 4 MiB or whose nesting exceeds 64 levels. `HttpTransport` enforces the
+byte cap on the raw response before parsing. Typed response models require their
+non-optional fields; schema failures return `DevkitError::Decode` and are not
+retried as transport failures. Unknown fields remain tolerated for forward
+compatibility with Stellar RPC additions.

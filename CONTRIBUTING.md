@@ -32,7 +32,7 @@ cargo build
 cargo test
 ```
 
-A recent stable Rust toolchain is required.
+Rust 1.91 or newer is required (the workspace MSRV).
 
 ## Before opening a pull request
 
@@ -45,13 +45,19 @@ cargo test --all
 ## Architecture
 
 Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first. The crate dependency
-direction is one-way: `devkit-cli → devkit-xdr → devkit-core`. Do not add a
-Stellar dependency to `devkit-core`.
+direction is one-way:
+
+```
+devkit-cli → devkit-xdr / devkit-rpc / devkit-contract / devkit-analysis / devkit-config
+             → devkit-core
+```
+
+Do not add a Stellar dependency to `devkit-core`.
 
 ## Adding functionality
 
 - Prefer composing with official crates (`stellar-xdr`, `stellar-strkey`, and
-  later `stellar-rpc-client`) over reimplementing.
+  `stellar-rpc-client`) over reimplementing.
 - Every fallible function returns `devkit_core::DevkitError`.
 - Add unit tests; decoding changes must include malformed-input tests.
 - Update documentation and `CHANGELOG.md` for user-visible changes.

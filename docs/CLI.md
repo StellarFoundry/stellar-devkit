@@ -17,7 +17,8 @@ Prints the tool name and version.
 ### `doctor`
 
 Prints a JSON report: tool, version, capabilities, networks (with passphrases
-and default RPC endpoints), and a statement that network access is disabled.
+and default RPC endpoints), and a statement that network access is explicit and
+limited to `rpc-health`.
 
 ### `strkey <VALUE>`
 
@@ -57,7 +58,7 @@ stellar-foundry --config ./stellar-foundry.toml rpc-health
 stellar-foundry rpc-health https://soroban-testnet.stellar.org
 ```
 
-Configuration files are limited to 1 MiB. Unknown TOML keys and invalid timeout values are rejected.
+Configuration files are limited to 1 MiB. Unknown TOML keys and invalid timeout values are rejected. See [CONFIGURATION.md](CONFIGURATION.md) for precedence, fields, and environment variables.
 
 ## Exit codes
 

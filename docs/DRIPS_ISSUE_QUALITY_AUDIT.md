@@ -1,8 +1,8 @@
 # Drips Issue Quality Audit
 
-- **Audit date:** 2026-09-22
-- **Repository commit audited:** 07bef9e
-- **Issues classified:** 121 (1 duplicate and 1 merge closed during remediation; 119 open).
+- **Audit date:** 2026-10-28
+- **Repository commit audited:** aec759c
+- **Issues classified:** 112 open issues.
 
 Standard applied: Drips *Creating Meaningful Issues* and the Wave maintainer
 documentation. Classification is evidence-based; weak issues are flagged, not
@@ -12,13 +12,17 @@ hidden. Nothing here claims Drips approval.
 
 | Classification | Count |
 |---|---:|
-| Drips-ready | 89 |
+| Drips-ready | 82 |
 | Needs revision | 3 |
 | Must split | 0 |
-| Must merge | 1 |
-| Remove | 1 |
+| Must merge | 0 |
+| Remove | 0 |
 | Defer | 3 |
 | Blocked | 24 |
+
+> **Post-merge note (2026-10-28):** #1, #7, #20, #25,
+> and #33 have merged or partial implementation on `main` and are excluded
+> from `docs/WAVE_BOARD.md` pending maintainer closure or re-scope.
 
 No issue required splitting: the largest issues are already scoped to a single
 capability, and the previously broad areas had already been decomposed.
@@ -31,10 +35,10 @@ through its own system.
 
 | Complexity | Count |
 |---|---:|
-| High | 28 |
-| Medium | 86 |
+| High | 27 |
+| Medium | 78 |
 | Trivial | 7 |
-| **Total** | **121** |
+| **Total** | **112** |
 
 No complexity label was changed during this audit: no issue was found to be
 clearly underpriced or overpriced. Complexity was not inflated.
@@ -97,7 +101,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #17
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -112,7 +116,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #17
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -157,7 +161,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #7
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -247,7 +251,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #12
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -307,7 +311,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #17
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -322,7 +326,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #14
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -442,7 +446,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #17
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -637,7 +641,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #36
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -652,7 +656,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #36
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -682,7 +686,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #41
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -697,7 +701,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #41
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -712,7 +716,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #44
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -757,7 +761,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #11
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -791,21 +795,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
-### #51 — feat(xdr): inspect diagnostic events
-
-- Classification: **Remove (duplicate)**
-- Complexity: medium
-- Area: xdr
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: FAIL — remove (duplicate).
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #50
-- Duplication: FAIL — duplicate.
-- Final recommendation: Remove (duplicate).
-
 ### #52 — feat(xdr): pretty-print ledger entries
 
 - Classification: **Drips-ready**
@@ -817,7 +806,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #4
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -877,7 +866,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #26
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -907,7 +896,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #61
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -952,7 +941,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #52
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -967,7 +956,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #50
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1027,7 +1016,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #11
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1117,7 +1106,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #27
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1147,7 +1136,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #27
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1192,7 +1181,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #14
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1207,7 +1196,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #37
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1222,7 +1211,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #37
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1237,7 +1226,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #79
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1252,7 +1241,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #78
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1267,7 +1256,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #78
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1282,7 +1271,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #78
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1316,21 +1305,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Duplication: PASS.
 - Final recommendation: Blocked by dependency.
 
-### #86 — feat(security): harden against untrusted RPC responses
-
-- Classification: **Drips-ready**
-- Complexity: high
-- Area: rpc
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #1
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
 ### #87 — feat(security): add a SARIF rule catalog with stable identifiers
 
 - Classification: **Blocked by dependency**
@@ -1351,21 +1325,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Classification: **Drips-ready**
 - Complexity: medium
 - Area: rpc
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #86
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
-### #89 — test(xdr): add a malformed XDR corpus
-
-- Classification: **Drips-ready**
-- Complexity: medium
-- Area: xdr
 - Impact: PASS — maps to a real capability of the toolkit.
 - Context: PASS — problem, why, current state, and scope sections present.
 - Scope: PASS — a single capability, Wave-sized.
@@ -1417,7 +1376,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #17
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1435,36 +1394,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Dependencies: #25
 - Duplication: PASS.
 - Final recommendation: Blocked by dependency.
-
-### #94 — test(ci): add a scheduled fuzz smoke job
-
-- Classification: **Drips-ready**
-- Complexity: medium
-- Area: security
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #20
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
-### #95 — feat(cli): add configuration profiles
-
-- Classification: **Merge**
-- Complexity: medium
-- Area: cli
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: FAIL — merge.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #7
-- Duplication: PASS.
-- Final recommendation: Merge.
 
 ### #96 — feat(cli): unify global flags across commands
 
@@ -1492,7 +1421,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #22
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1500,36 +1429,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 
 - Classification: **Drips-ready**
 - Complexity: trivial
-- Area: cli
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #10
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
-### #99 — feat(cli): add a JSON error output mode
-
-- Classification: **Drips-ready**
-- Complexity: medium
-- Area: cli
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #36
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
-### #100 — feat(cli): add stdin input for decode commands
-
-- Classification: **Drips-ready**
-- Complexity: medium
 - Area: cli
 - Impact: PASS — maps to a real capability of the toolkit.
 - Context: PASS — problem, why, current state, and scope sections present.
@@ -1597,7 +1496,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #29
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1661,21 +1560,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Duplication: PASS.
 - Final recommendation: Blocked by dependency.
 
-### #109 — perf: measure memory usage on large inputs
-
-- Classification: **Drips-ready**
-- Complexity: medium
-- Area: performance
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: None.
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
 ### #110 — feat(core): add an optional decode cache
 
 - Classification: **Needs revision**
@@ -1721,21 +1605,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
-### #113 — ci(release): automate changelog generation
-
-- Classification: **Drips-ready**
-- Complexity: medium
-- Area: release
-- Impact: PASS — maps to a real capability of the toolkit.
-- Context: PASS — problem, why, current state, and scope sections present.
-- Scope: PASS — a single capability, Wave-sized.
-- Acceptance criteria: PASS — testable criteria present.
-- Testing: PASS — tests requested.
-- Security: N/A or addressed where relevant.
-- Dependencies: #112
-- Duplication: PASS.
-- Final recommendation: Drips-ready.
-
 ### #114 — feat(release): prepare crates.io packaging
 
 - Classification: **Drips-ready**
@@ -1747,7 +1616,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #34
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1762,7 +1631,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #29
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1777,7 +1646,7 @@ clearly underpriced or overpriced. Complexity was not inflated.
 - Acceptance criteria: PASS — testable criteria present.
 - Testing: PASS — tests requested.
 - Security: N/A or addressed where relevant.
-- Dependencies: #34
+- Dependencies: None.
 - Duplication: PASS.
 - Final recommendation: Drips-ready.
 
@@ -1925,25 +1794,18 @@ clearly underpriced or overpriced. Complexity was not inflated.
 | #81 | feat(security): add a security fixture corpus | high | testing | Depends only on implemented or independent work; testable. |
 | #82 | test(security): add false-positive regression tests | medium | testing | Depends only on implemented or independent work; testable. |
 | #83 | test(security): add false-negative regression tests | medium | testing | Depends only on implemented or independent work; testable. |
-| #86 | feat(security): harden against untrusted RPC responses | high | rpc | Depends only on implemented or independent work; testable. |
 | #88 | test(security): fuzz RPC response parsing | medium | rpc | Depends only on implemented or independent work; testable. |
-| #89 | test(xdr): add a malformed XDR corpus | medium | xdr | Depends only on implemented or independent work; testable. |
 | #90 | test(rpc): add snapshot tests for RPC response models | medium | rpc | Depends only on implemented or independent work; testable. |
 | #91 | test: add cross-platform and endianness tests | medium | testing | Depends only on implemented or independent work; testable. |
 | #92 | test: add a regression corpus runner | medium | testing | Depends only on implemented or independent work; testable. |
-| #94 | test(ci): add a scheduled fuzz smoke job | medium | security | Depends only on implemented or independent work; testable. |
 | #96 | feat(cli): unify global flags across commands | medium | cli | Depends only on implemented or independent work; testable. |
 | #97 | feat(cli): improve error presentation with suggestions | medium | cli | Depends only on implemented or independent work; testable. |
 | #98 | feat(cli): add verbosity control | trivial | cli | Depends only on implemented or independent work; testable. |
-| #99 | feat(cli): add a JSON error output mode | medium | cli | Depends only on implemented or independent work; testable. |
-| #100 | feat(cli): add stdin input for decode commands | medium | cli | Depends only on implemented or independent work; testable. |
 | #104 | feat(ci): add a release validation workflow | medium | release | Depends only on implemented or independent work; testable. |
 | #105 | chore(ci): add triage automation for issues and pull requests | medium | github | Depends only on implemented or independent work; testable. |
 | #106 | feat(ci): add dependency and license auditing | medium | security | Depends only on implemented or independent work; testable. |
-| #109 | perf: measure memory usage on large inputs | medium | performance | Depends only on implemented or independent work; testable. |
 | #111 | perf: add performance regression tests to CI | medium | ci | Depends only on implemented or independent work; testable. |
 | #112 | docs(release): define the versioning and compatibility policy | medium | release | Depends only on implemented or independent work; testable. |
-| #113 | ci(release): automate changelog generation | medium | release | Depends only on implemented or independent work; testable. |
 | #114 | feat(release): prepare crates.io packaging | high | release | Depends only on implemented or independent work; testable. |
 | #115 | ci(release): generate an SBOM and artifact attestations | high | security | Depends only on implemented or independent work; testable. |
 | #116 | ci(release): add compatibility testing across toolchains | medium | release | Depends only on implemented or independent work; testable. |
@@ -1962,7 +1824,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 | #42 | Defer / future work | Label status/deferred; revisit when the subsystem is planned. |
 | #46 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #47 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
-| #51 | Remove (duplicate) | Close as duplicate of #73; keep the canonical event issue. |
 | #55 | Needs revision | Revise the issue body before it can be Wave-ready. |
 | #65 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #67 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
@@ -1976,7 +1837,6 @@ clearly underpriced or overpriced. Complexity was not inflated.
 | #85 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #87 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #93 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
-| #95 | Merge | Close and fold into #8 (network profiles). |
 | #101 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #102 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |
 | #103 | Blocked by dependency | Label status/blocked; add to a Wave only after the dependency lands. |

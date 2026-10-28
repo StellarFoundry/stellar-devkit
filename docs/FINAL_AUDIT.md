@@ -1,33 +1,41 @@
 # Final Audit
 
 Honest status of the repository at the time of writing. **Verified** means the
-check was actually run; **Pending** means it is not done.
+check was actually run; **Partial** means some evidence exists but the item is
+not complete; **Pending** means it is not done.
+
+Audit date: 2026-10-28. Commit: `aec759c`.
 
 | Item | Status | Evidence |
 | ---- | ------ | -------- |
 | Build succeeds | Verified | `cargo build` |
-| Tests pass | Verified | 22 tests, `cargo test --all` |
-| Lint passes | Verified | `cargo clippy --all-targets --all-features -- -D warnings` |
+| Tests pass | Verified | `cargo test --locked --workspace --all-features` (43 tests); post-merge CI |
+| Lint passes | Verified | `cargo clippy --locked --all-targets --all-features -- -D warnings` |
 | Formatting passes | Verified | `cargo fmt --all -- --check` |
-| CI passes | Verified | GitHub Actions on Linux/Windows/macOS |
+| CI passes | Verified | CI run 40690141880 on Linux/Windows/macOS |
+| Dependency audit | Verified | RustSec run 40690141721 |
 | No secrets in repo | Verified | No secrets; `.gitignore` excludes keys/env |
-| No placeholder/fake implementations | Verified | CLI exposes only working commands |
-| Documentation for public features | Verified | README + docs set |
-| Issue backlog present | Verified | 119 issues on GitHub |
-| Issue complexity honest | Verified | 7 trivial / 84 medium / 28 high |
-| Live RPC transport | Pending | Mock only; tracked as an issue |
-| Contract inspection | Pending | Tracked as an issue |
-| Security analysis + SARIF | Pending | Tracked as issues |
-| GitHub Action | Pending | Tracked as an issue |
-| Release binaries / crates.io | Pending | Tracked as issues |
-| MSRV pinned | Pending | Tracked as an issue |
-| Fuzzing | Pending | Tracked as an issue |
-| Performance measured | Pending | Benchmark tracked as an issue |
+| No placeholder/fake implementations | Verified | CLI exposes only commands that do real work |
+| Documentation for public features | Verified | README plus the `docs/` set |
+| Issue backlog present | Verified | 112 open issues |
+| Issue complexity honest | Verified | 7 trivial / 78 medium / 27 high |
+| Live RPC transport | Verified | `devkit_rpc::HttpTransport`; `rpc-health`; CI tests |
+| Contract inspection | Verified | `inspect-wasm`; `devkit-contract` tests |
+| Security analysis + SARIF | Verified (structural) | `devkit-analysis`; `analyze-wasm --format sarif` |
+| MSRV pinned | Verified | `rust-version = "1.91"`; MSRV CI job |
+| Fuzzing | Verified | `fuzz/fuzz_targets/*`; scheduled fuzz workflow |
+| Performance measured | Partial | Memory measurement example; benchmarks pending |
+| Composite GitHub Action | Pending | Tracked as an issue; only manual SARIF upload exists |
+| Release binaries / crates.io | Pending | No tag, no binaries, no crates.io package |
+| External contributors | Pending | No external contributor has merged a PR yet |
 
 ## Notes
 
-- No documentation claims a feature that does not exist; the README lists
-  "what works today" and marks everything else as planned.
+- The README lists what works today and marks planned work as planned.
+- Analysis findings are structural heuristics and do not prove a contract is
+  secure.
 - No coverage percentage is claimed.
-- No performance number is claimed.
+- No performance number is claimed beyond the memory measurement example.
 - Complexity is not inflated to reach an aggregate reward target.
+- The Wave board is curated from open issues only; see
+  [WAVE_BOARD.md](WAVE_BOARD.md).

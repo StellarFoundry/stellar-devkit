@@ -1,10 +1,10 @@
 //! Stellar RPC protocol layer.
 //!
 //! This crate models the Stellar RPC JSON-RPC protocol and separates it from
-//! transport. It does **not** perform network I/O: a [`Transport`] is injected.
-//! A [`MockTransport`] makes RPC-based tooling testable and deterministic, and
-//! a production transport (wrapping the official `stellar-rpc-client`) is
-//! future work tracked as an issue.
+//! transport. A [`Transport`] is injected. [`MockTransport`] makes RPC-based
+//! tooling testable and deterministic, and [`HttpTransport`] provides a bounded
+//! HTTP JSON-RPC transport. Integrating the official `stellar-rpc-client`
+//! remains future work tracked as an issue.
 //!
 //! Security posture:
 //! * Endpoints are validated before use; plaintext `http` is only allowed for

@@ -2,15 +2,19 @@
 
 ## Repository
 
-<https://github.com/StellarFoundry/stellar-devkit> — default branch `main`.
+<https://github.com/StellarFoundry/stellar-devkit> — default branch `main`,
+commit `aec759c` (2026-10-28).
 
 ## Architecture
 
-Four crates with a one-way dependency direction:
+Seven crates with a one-way dependency direction:
 
 ```
 devkit-cli ──▶ devkit-rpc ──▶ devkit-core
-     └──────▶ devkit-xdr ──▶ devkit-core
+     ├──────▶ devkit-xdr ──▶ devkit-core
+     ├──────▶ devkit-contract ──▶ devkit-core
+     ├──────▶ devkit-analysis ──▶ devkit-core
+     └──────▶ devkit-config
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md).
@@ -20,72 +24,85 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 - `devkit-core`: `DevkitError`, `Network` profiles with canonical passphrases,
   `OutputFormat`.
 - `devkit-xdr`: bounded base64 decoding of `ScVal`, `TransactionEnvelope`, and
-  `ContractEvent` to JSON; strkey classification.
-- `devkit-rpc`: `Transport` trait, deterministic `MockTransport`, validated
-  `Endpoint` (https only; loopback http; no embedded credentials), typed
-  `Health`/`NetworkInfo`/`LatestLedger`, `getEvents`/`getFeeStats` passthrough,
-  retry policy.
-- `devkit-cli`: `stellar-foundry version|doctor|strkey|scval|envelope|event|endpoint`.
+  `ContractEvent` to JSON; strkey classification; malformed-input corpus.
+- `devkit-rpc`: `Transport` trait, deterministic `MockTransport`, bounded
+  `HttpTransport`, validated `Endpoint`, typed `Health`/`NetworkInfo`/
+  `LatestLedger`, `getEvents`/`getFeeStats` passthrough, retry policy.
+- `devkit-contract`: non-executing WASM validation, imports/exports/custom
+  sections, and bounded `contractspecv0` decoding.
+- `devkit-analysis`: deterministic structural findings and SARIF 2.1.0 output.
+- `devkit-config`: strict TOML parsing, timeout validation, environment
+  overrides, and static diagnostics.
+- `devkit-cli`: `stellar-foundry version|doctor|strkey|scval|envelope|event|endpoint|inspect-wasm|analyze-wasm|rpc-health`.
 
 ## Tests
 
-22 unit tests (4 core, 5 xdr, 13 rpc). Run with `cargo test --all`. Results come
-from actual local runs; CI runs the same suite on Linux, Windows, and macOS.
+43 tests across unit, integration, malformed-corpus, and CLI tests. Run with
+`cargo test --locked --workspace --all-features`. CI runs the same suite on
+Linux, Windows, and macOS, plus an MSRV job on Rust 1.91.0.
 
 ## CI
 
-`CI` workflow: format, clippy (`-D warnings`), and tests on three operating
-systems. Passing on all commits at the time of writing.
+`CI` workflow: format, Clippy (`-D warnings`), and tests on three operating
+systems. Additional workflows: RustSec dependency audit, scheduled fuzz smoke,
+release validation on version tags, changelog generation, and manual SARIF
+upload.
 
 ## Documentation
 
 `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`,
-`CHANGELOG.md`, `docs/ECOSYSTEM_RESEARCH.md`, `docs/ARCHITECTURE.md`,
-`docs/GETTING_STARTED.md`, `docs/CLI.md`, `docs/ROADMAP.md`,
-`docs/PROJECT_STATUS.md`, `docs/ISSUE_BACKLOG.md`, `docs/DRIPS_*`, this report.
+`CHANGELOG.md`, `docs/ECOSYSTEM_RESEARCH.md`, `docs/WHY_DEVKIT.md`,
+`docs/ARCHITECTURE.md`, `docs/GETTING_STARTED.md`, `docs/CLI.md`,
+`docs/ROADMAP.md`, `docs/PROJECT_STATUS.md`, `docs/IMPLEMENTED_CAPABILITIES.md`,
+`docs/ISSUE_BACKLOG.md`, `docs/WAVE_BOARD.md`, `docs/DRIPS_*`, `docs/APPEAL.md`,
+and this report.
 
 ## Security
 
-No network access by default; bounded decoding; structured errors; endpoint
-policy rejects plaintext remote HTTP, embedded credentials, and unknown schemes;
-no secrets read or logged. Fuzzing and SSRF hardening are tracked as issues.
+No network access by default; the only networked command is `rpc-health` with an
+explicit endpoint. Decoding is bounded; errors are structured; endpoint policy
+rejects plaintext remote HTTP, embedded credentials, and unknown schemes. The
+HTTP transport disables redirects and caps response bytes before parsing. Fuzz
+targets cover `ScVal`, `TransactionEnvelope`, and `ContractEvent`. No secrets are
+read or logged.
 
 ## Release status
 
-No releases yet. No binaries, no crates.io publication.
+No releases yet. No tagged release, binaries, or crates.io publication.
 
 ## Issue backlog
 
-- **Total open issues:** 119
+- **Total open issues:** 112
 - **Trivial:** 7
-- **Medium:** 84
-- **High:** 28
+- **Medium:** 78
+- **High:** 27
 
 Issue complexity is assigned from the scope of each individual issue rather than
-an aggregate reward target. Complexity was not inflated. The backlog reflects the
-project's currently identified implementation work; most of it is **not
-implemented**.
+an aggregate reward target. Complexity was not inflated. Most of the backlog is
+**not implemented**.
 
 ## Drips readiness
 
-See [DRIPS_READINESS.md](DRIPS_READINESS.md) and
-[DRIPS_APPLICATION_DRAFT.md](DRIPS_APPLICATION_DRAFT.md). Approval, points, and
-payout are not guaranteed.
+See [DRIPS_READINESS.md](DRIPS_READINESS.md),
+[DRIPS_APPLICATION_DRAFT.md](DRIPS_APPLICATION_DRAFT.md), and
+[APPEAL.md](APPEAL.md). Approval, points, and payout are not guaranteed.
 
 ## Known limitations
 
-- No live RPC transport; the RPC layer is mock-only.
-- No contract inspection implementation, security engine, SARIF, or GitHub Action
-  yet (all tracked as issues).
+- No tagged release, release binaries, or crates.io publication.
+- `contractspecv0` output is XDR-JSON with best-effort names, not a normalized
+  ABI.
+- Analysis rules are structural heuristics, not a vulnerability proof.
+- RPC configuration applies to `rpc-health`; other commands do not make network
+  requests.
 - JSON output shape is unstable until the versioned schema lands.
-- No MSRV pin; no release automation.
-- The backlog (119 issues) is a roadmap; most of it is **not implemented**.
+- No external contributor has merged a PR yet.
 
 ## Recommended next steps
 
-1. Implement the live HTTP transport over `stellar-rpc-client` and the SSRF
-   hardening that must accompany it.
-2. Add the configuration system and logging.
-3. Define the versioned JSON schema.
-4. Build the fixtures and testing infrastructure.
-5. Grow the backlog honestly as real scope is implemented.
+1. Tag and publish `v0.1.0` with release binaries and checksums.
+2. Publish the workspace crates to crates.io.
+3. Add typed RPC models for `getLedgerEntries`, `getTransaction(s)`, and
+   `getFeeStats`.
+4. Define the versioned JSON schema.
+5. Grow external usage and contributors before the next appeal.

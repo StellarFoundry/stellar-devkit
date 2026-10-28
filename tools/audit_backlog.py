@@ -11,13 +11,23 @@ invents work or inflates complexity.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import re
+import subprocess
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "DRIPS_ISSUE_QUALITY_AUDIT.md"
+
+
+def repository_commit() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, encoding="utf-8",
+    )
+    return result.stdout.strip() or "unknown"
 
 # Duplicate issue -> canonical issue.
 DUPLICATES = {51: 73}
@@ -155,9 +165,9 @@ def main() -> int:
     lines = [
         "# Drips Issue Quality Audit",
         "",
-        "- **Audit date:** 2026-09-22",
-        "- **Repository commit audited:** 07bef9e",
-        "- **Issues classified:** " + str(len(rows)) + " (1 duplicate and 1 merge closed during remediation; 119 open).",
+        f"- **Audit date:** {datetime.date.today().isoformat()}",
+        f"- **Repository commit audited:** {repository_commit()}",
+        f"- **Issues classified:** {len(rows)} open issues.",
         "",
         "Standard applied: Drips *Creating Meaningful Issues* and the Wave maintainer",
         "documentation. Classification is evidence-based; weak issues are flagged, not",
@@ -174,6 +184,10 @@ def main() -> int:
         f"| Remove | {counts.get('Remove (duplicate)', 0)} |",
         f"| Defer | {counts.get('Defer / future work', 0)} |",
         f"| Blocked | {counts.get('Blocked by dependency', 0)} |",
+        "",
+        f"> **Post-merge note ({datetime.date.today().isoformat()}):** #1, #7, #20, #25,",
+        "> and #33 have merged or partial implementation on `main` and are excluded",
+        "> from `docs/WAVE_BOARD.md` pending maintainer closure or re-scope.",
         "",
         "No issue required splitting: the largest issues are already scoped to a single",
         "capability, and the previously broad areas had already been decomposed.",

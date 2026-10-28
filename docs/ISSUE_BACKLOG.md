@@ -3,9 +3,9 @@
 Generated from `tools/backlog/issues_*.json`. Closed and superseded
 definitions are excluded.
 
-**Total open issues:** 119
+**Total open issues:** 112
 
-Complexity: 7 trivial, 84 medium, 28 high.
+Complexity: 7 trivial, 78 medium, 27 high.
 
 ## phase/01-foundation
 
@@ -97,12 +97,10 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | #17 | feat(testing): add a fixture loader and schema | testing | high | None. |
 | #18 | feat(testing): add mock RPC network scenarios | rpc | medium | Fixture loader issue. |
 | #19 | test(xdr): add property-based round-trip tests | xdr | medium | Encode helpers issue. |
-| #89 | test(xdr): add a malformed XDR corpus | xdr | medium | None. |
 | #90 | test(rpc): add snapshot tests for RPC response models | rpc | medium | None. |
 | #91 | test: add cross-platform and endianness tests | testing | medium | None. |
 | #92 | test: add a regression corpus runner | testing | medium | Fixture loader issue. |
 | #93 | test(contracts): add fixture WASM contracts | contract-inspection | high | WASM spec extraction issue. |
-| #94 | test(ci): add a scheduled fuzz smoke job | security | medium | Fuzz targets. |
 
 ## phase/07-security
 
@@ -119,7 +117,6 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | #83 | test(security): add false-negative regression tests | testing | medium | Rule engine issue. |
 | #84 | feat(security): validate contract metadata for consistency | contract-inspection | medium | WASM spec extraction issue. |
 | #85 | feat(security): add WASM safety checks | contract-inspection | high | WASM container validation issue. |
-| #86 | feat(security): harden against untrusted RPC responses | rpc | high | Live transport issue. |
 | #88 | test(security): fuzz RPC response parsing | rpc | medium | Untrusted RPC response hardening issue. |
 
 ## phase/08-cli
@@ -134,8 +131,6 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | #96 | feat(cli): unify global flags across commands | cli | medium | None. |
 | #97 | feat(cli): improve error presentation with suggestions | cli | medium | Secret redaction issue. |
 | #98 | feat(cli): add verbosity control | cli | trivial | Structured logging issue. |
-| #99 | feat(cli): add a JSON error output mode | cli | medium | Error taxonomy issue. |
-| #100 | feat(cli): add stdin input for decode commands | cli | medium | None. |
 
 ## phase/09-github
 
@@ -159,7 +154,6 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | #28 | perf(observability): benchmark decode throughput | observability | medium | None. |
 | #107 | perf(rpc): measure and document RPC call overhead | rpc | medium | Local integration test server issue. |
 | #108 | perf(xdr): optimize SCVal decoding for large maps | scval | medium | SCVal collections issue. |
-| #109 | perf: measure memory usage on large inputs | performance | medium | None. |
 | #110 | feat(core): add an optional decode cache | core | medium | None. |
 | #111 | perf: add performance regression tests to CI | performance | medium | Decode and RPC benchmarks. |
 
@@ -171,7 +165,6 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | #31 | ci(deps): configure automated dependency updates | release | trivial | None. |
 | #34 | ci(msrv): pin and test a minimum supported Rust version | release | medium | None. |
 | #112 | docs(release): define the versioning and compatibility policy | release | medium | None. |
-| #113 | ci(release): automate changelog generation | release | medium | Versioning policy issue. |
 | #114 | feat(release): prepare crates.io packaging | release | high | MSRV pin. |
 | #115 | ci(release): generate an SBOM and artifact attestations | security | high | Release binaries issue. |
 | #116 | ci(release): add compatibility testing across toolchains | release | medium | MSRV pin. |
@@ -195,10 +188,10 @@ Complexity: 7 trivial, 84 medium, 28 high.
 | phase/03-xdr-scval | 13 |
 | phase/04-analysis | 15 |
 | phase/05-contracts | 10 |
-| phase/06-testing | 9 |
-| phase/07-security | 13 |
-| phase/08-cli | 10 |
+| phase/06-testing | 7 |
+| phase/07-security | 12 |
+| phase/08-cli | 8 |
 | phase/09-github | 10 |
-| phase/10-observability | 6 |
-| phase/12-release | 8 |
-| **Total** | **119** |
+| phase/10-observability | 5 |
+| phase/12-release | 7 |
+| **Total** | **112** |

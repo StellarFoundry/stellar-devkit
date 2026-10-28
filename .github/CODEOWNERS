@@ -1,0 +1,8 @@
+# Default owners for the repository.
+* @Ayinkx @Ayinkx01
+
+# Release, CI, and security-sensitive paths.
+/.github/ @Ayinkx @Ayinkx01
+/SECURITY.md @Ayinkx @Ayinkx01
+/docs/DRIPS_READINESS.md @Ayinkx @Ayinkx01
+/docs/APPEAL.md @Ayinkx @Ayinkx01

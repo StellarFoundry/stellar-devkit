@@ -7,22 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+The workspace version is `0.1.0`. This section describes merged work on `main`;
+no tagged release or crates.io publication exists yet.
+
 ### Added
 
+- `devkit-core`: structured errors, network profiles, and output formats.
+- `devkit-xdr`: bounded base64 decoding for `ScVal`, `TransactionEnvelope`, and
+  `ContractEvent`, plus strkey classification and malformed-input regression
+  fixtures.
+- `devkit-rpc`: endpoint validation, typed protocol models, deterministic mock
+  transport, retry policy, and bounded HTTP JSON-RPC transport.
 - `devkit-contract`: bounded, non-executing WASM validation and structural
-  metadata for imports, exports, and custom sections.
-- `devkit-analysis`: deterministic structural findings with stable rule IDs
-  and SARIF 2.1.0 serialization.
+  metadata for imports, exports, and custom sections, including bounded
+  `contractspecv0` decoding.
+- `devkit-analysis`: deterministic structural findings with stable rule IDs and
+  SARIF 2.1.0 serialization.
 - `devkit-config`: strict TOML configuration parsing, timeout validation,
   environment overrides, and static diagnostic events.
-- `devkit-rpc`: bounded HTTP JSON-RPC transport with timeout, redirects
-  disabled, response-size limits, response validation, and structured errors.
-- CLI commands `inspect-wasm`, `analyze-wasm`, and `rpc-health`.
-- `rpc-health` now consumes bounded TOML configuration, timeout settings, and environment overrides; endpoint precedence is explicit in the CLI reference.
-- Release-validation workflow, release checklist, Drips readiness checklist, and manual SARIF upload workflow for GitHub code scanning.
-- RustSec dependency auditing and declared Rust 1.91 workspace MSRV in PR #127.
-- Malformed-XDR regression corpus and bounded-input hardening.
+- CLI commands `endpoint`, `inspect-wasm`, `analyze-wasm`, and `rpc-health`, in
+  addition to `version`, `doctor`, `strkey`, `scval`, `envelope`, and `event`.
+- `rpc-health` consumes bounded TOML configuration, timeout settings, and
+  environment overrides; endpoint precedence is documented in the CLI reference.
+- Release-validation workflow, release checklist, Drips readiness checklist, and
+  manual SARIF upload workflow for GitHub code scanning.
+- RustSec dependency auditing, declared Rust 1.91 workspace MSRV, and a
+  dedicated MSRV CI job.
+- Malformed-XDR regression corpus, bounded-input hardening, and fuzz targets for
+  `ScVal`, `TransactionEnvelope`, and `ContractEvent`.
 - CI: formatting, Clippy, and Linux, Windows, and macOS tests.
+
+### Changed
+
+- Documentation now describes merged work as merged: project status, readiness,
+  architecture, getting started, roadmap, issue audit, backlog, and Wave board
+  were regenerated against `main`.
+- `docs/WAVE_BOARD.md` now contains only open, independent, Wave-sized issues.
+- Added `docs/WHY_DEVKIT.md` to document the boundary with official Stellar
+  tooling and `soroban-security-scanner`.
 
 ### Fixed
 
@@ -33,12 +55,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Limitations
 
-- These changes are on open pull-request branches and are not all merged to
-  `main`.
+- No tagged release, release binaries, or crates.io publication exists yet.
 - `contractspecv0` XDR entries are decoded into official XDR-JSON definitions
-  with a variant kind and best-effort name; a normalized ABI schema remains future work.
-- Analysis findings are structural heuristics, not a comprehensive
-  vulnerability detector.
+  with a variant kind and best-effort name; a normalized ABI schema remains
+  future work.
+- Analysis findings are structural heuristics, not a comprehensive vulnerability
+  detector.
 - SARIF upload requires manual workflow dispatch, a repository-relative WASM
   artifact, and GitHub code-scanning permissions.
-- The configuration API is currently wired into `rpc-health`; other commands do not consume RPC configuration because they do not need it.
+- The configuration API is currently wired into `rpc-health`; other commands do
+  not consume RPC configuration because they do not make network requests.
